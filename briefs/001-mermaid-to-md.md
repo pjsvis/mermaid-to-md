@@ -87,16 +87,16 @@ mermaid-to-md --inject doc.md    → regenerate all art blocks in-place
 
 ### Phase 1
 
-- [ ] `scripts/mermaid-to-md.sh <file.mmd>` emits valid markdown with the rendered art to stdout
-- [ ] `mermaid-to-md.sh <file.mmd> -o <out.md>` writes the file
-- [ ] `echo 'graph TD\n  A --> B' | mermaid-to-md.sh` works from stdin
-- [ ] `--title "My Diagram"` sets the heading; default derives from filename
-- [ ] Output markdown renders the art block correctly in Glow (verified by eye)
-- [ ] Source block uses `​```mmd` fence (NOT `​```mermaid`) — GitHub shows it as plain text, not a second live diagram
-- [ ] Empty/blank input produces a valid (empty) markdown file, not a crash
-- [ ] Binary-not-built error message matches `mermaid-extract.sh` convention
-- [ ] Script is ≤40 lines of bash
-- [ ] No rendering logic in the script — it only wraps the binary's output
+- [x] `scripts/mermaid-to-md.sh <file.mmd>` emits valid markdown with the rendered art to stdout
+- [x] `mermaid-to-md.sh <file.mmd> -o <out.md>` writes the file
+- [x] `echo 'graph TD\n  A --> B' | mermaid-to-md.sh` works from stdin
+- [x] `--title "My Diagram"` sets the heading; default derives from filename
+- [x] Output markdown renders the art block correctly in Glow (verified by eye)
+- [x] Source block uses `​```mmd` fence (NOT `​```mermaid`) — GitHub shows it as plain text, not a second live diagram
+- [x] Empty/blank input produces a valid (empty) markdown file, not a crash
+- [x] Binary-not-built error message matches `mermaid-extract.sh` convention
+- [x] Script is ≤40 lines of bash (31 lines)
+- [x] No rendering logic in the script — it only wraps the binary's output
 
 ### Phase 2 (gated)
 
