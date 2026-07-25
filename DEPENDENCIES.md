@@ -98,16 +98,29 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
 ```
 
-`just` and `glow` are available via cargo install if your distribution does
-not package them:
+`just` is a Rust crate and installs via cargo:
 
 ```bash
 cargo install just
-cargo install glow
 ```
 
-Or via your distribution's package manager (e.g. `apt`, `dnf`, `pacman`).
-The exact package names and availability vary by distribution.
+`glow` is **not** a Rust crate — it is Charm's Go binary, so `cargo install
+glow` does not work (the `glow` crate on crates.io is an unrelated OpenGL
+bindings library). Install the canonical Charm `glow` via a package manager
+or Go:
+
+```bash
+brew install glow          # Homebrew (macOS or Linux)
+pacman -S glow             # Arch
+sudo snap install glow     # Snap
+# Debian/Ubuntu and Fedora/RHEL: use Charm's apt/yum repo — see
+#   https://github.com/charmbracelet/glow#installation
+# or, with Go installed:
+go install github.com/charmbracelet/glow/v2@latest
+```
+
+Both `just` and `glow` are also packaged by many distributions
+(e.g. `apt`, `dnf`, `pacman`); exact names and availability vary.
 
 **Contributing:** If you have verified install instructions for a specific
 Linux distribution, please open a PR updating this section with the exact
@@ -123,11 +136,26 @@ winget install Rustlang.Rustup
 
 Or download from [https://rustup.rs](https://rustup.rs).
 
-`just` and `glow` are available via cargo:
+`just` is a Rust crate and installs via cargo:
 
 ```powershell
 cargo install just
-cargo install glow
+```
+
+`glow` is **not** a Rust crate (it is Charm's Go binary), so `cargo install
+glow` does not work. Install the canonical Charm `glow` via a Windows
+package manager:
+
+```powershell
+winget install charmbracelet.glow
+scoop install glow
+choco install glow
+```
+
+Or, with Go installed:
+
+```powershell
+go install github.com/charmbracelet/glow/v2@latest
 ```
 
 **Contributing:** If you have verified install instructions for Windows
