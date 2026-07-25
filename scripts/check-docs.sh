@@ -18,9 +18,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 DOCS=(about.md README.md USAGE.md)
-# Currently-legitimate pending: npm packaging (bin/mermaid-to-md.js, npx).
-# When td-6e3b3a ships, drop this and fix any remaining hits.
-ALLOW='placeholder|once published|npm packaging is pending|npx mermaid-to-md'
+# Currently-legitimate pending: npm publishing (not yet on the registry).
+# When td-6e3b3a Phase 3 ships publishing, drop this and fix any remaining hits.
+ALLOW='once published|npm packaging is pending|npx mermaid-to-md'
 
 STALE='to be written|to be implemented|not yet implemented|\(planned\)|planned, not yet'
 

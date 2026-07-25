@@ -1,0 +1,35 @@
+mermaid-to-md
+=============
+
+This product includes software developed by SpaceXAI
+(https://github.com/xai-org/grok-build).
+
+
+Component: src/mermaid.rs
+  Source:    https://github.com/xai-org/grok-build
+             crates/codegen/xai-grok-markdown/src/mermaid.rs
+  Copyright: (c) 2023-2026 SpaceXAI
+  License:   Apache License 2.0 (see LICENSE-Apache-2.0.txt)
+
+  Modifications (Apache-2.0 §4(b)):
+    The upstream module uses `ratatui` for styled terminal output. This copy
+    removes that dependency: the `ratatui::style` and `ratatui::text` imports
+    are replaced with inline no-op stubs (the "Style stubs (ratatui
+    extraction)" block at the top of src/mermaid.rs), and the `styled_lines`
+    field plus all span-construction logic are removed from `MermaidArt`,
+    `Canvas::to_lines`, `render_fallback_box`, and the four diagram renderers.
+    Only the `plain_lines` (plain Vec<String>) output path is retained; its
+    output is byte-identical to upstream. Parsing, layout, edge routing, and
+    the box-drawing canvas are otherwise unchanged.
+
+
+Repository licensing (dual, by component):
+  - Wrapper layer (scripts/, bin/, src/main.rs) — MIT, (c) 2026 Peter Smith.
+    See LICENSE.
+  - Renderer (src/mermaid.rs) — Apache License 2.0, (c) 2023-2026 SpaceXAI.
+    See LICENSE-Apache-2.0.txt.
+
+Prebuilt platform binaries (distributed via npm optional-dependency packages,
+e.g. mermaid-to-md-darwin-arm64) are derivative works of the Apache-2.0
+renderer and are distributed under its terms; this NOTICE and
+LICENSE-Apache-2.0.txt accompany them.

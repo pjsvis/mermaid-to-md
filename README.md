@@ -85,7 +85,7 @@ mermaid-to-md/
 │   ├── main.rs             # CLI entry point
 │   └── mermaid.rs          # the renderer (5,238 lines)
 ├── bin/
-│   └── mermaid-to-md.js    # JS wrapper for npm (placeholder, Phase 2)
+│   └── mermaid-to-md.js    # JS wrapper for npm — bake/inject/verify (cross-platform)
 ├── scripts/
 │   ├── mermaid-to-md.sh    # bash wrapper — bake/inject/verify (shipped)
 │   └── mermaid-extract.sh  # sibling: extract mmd from markdown → terminal

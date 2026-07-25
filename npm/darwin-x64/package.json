@@ -1,0 +1,13 @@
+{
+  "name": "mermaid-to-md-darwin-x64",
+  "version": "0.1.0",
+  "description": "Precompiled mermaid-tui binary for darwin-x64. Installed automatically as an optional dependency of mermaid-to-md.",
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "https://github.com/pjsvis/mermaid-to-md.git" },
+  "os": ["darwin"],
+  "cpu": ["x64"],
+  "files": ["bin/", "NOTICE", "LICENSE-Apache-2.0.txt"],
+  "bin": {
+    "mermaid-tui": "bin/mermaid-tui"
+  }
+}

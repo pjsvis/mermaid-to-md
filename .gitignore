@@ -3,6 +3,11 @@ target/
 
 # Node
 node_modules/
+*.tgz
+
+# npm platform binaries — build artifacts (built by CI in Phase 3, not committed)
+npm/*/bin/mermaid-tui
+npm/*/bin/mermaid-tui.exe
 
 # macOS
 .DS_Store

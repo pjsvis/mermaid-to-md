@@ -11,17 +11,19 @@
     "mermaid-to-md": "bin/mermaid-to-md.js"
   },
   "scripts": {
-    "test": "echo \"Error: no tests yet\" && exit 1"
+    "test": "scripts/test-inject.sh"
   },
   "files": [
     "bin/",
-    "scripts/"
+    "scripts/",
+    "LICENSE"
   ],
   "optionalDependencies": {
     "mermaid-to-md-darwin-arm64": "0.1.0",
     "mermaid-to-md-darwin-x64": "0.1.0",
     "mermaid-to-md-linux-x64": "0.1.0",
-    "mermaid-to-md-linux-arm64": "0.1.0"
+    "mermaid-to-md-linux-arm64": "0.1.0",
+    "mermaid-to-md-win32-x64": "0.1.0"
   },
   "engines": {
     "node": ">=18"
