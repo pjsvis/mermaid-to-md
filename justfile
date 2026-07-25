@@ -25,6 +25,11 @@ about:
 build:
     cargo build --release
 
+# ── Test ──
+
+test: build
+    @scripts/test-inject.sh
+
 # ── Mermaid rendering ──
 
 mermaid FILE BLOCK="":
