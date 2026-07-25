@@ -8,10 +8,12 @@ on:
 
 jobs:
   build-and-test:
+    name: Build + test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -22,11 +24,58 @@ jobs:
       - name: Build
         run: cargo build --release
 
-      - name: Smoke test
+      - name: Install just (non-Windows)
+        if: runner.os != 'Windows'
         run: |
-          echo 'graph TD
-            A --> B --> C' | ./target/release/mermaid-tui
+          curl -fsSL https://github.com/casey/just/releases/latest/download/just-$(uname -m)-unknown-linux-musl -o /usr/local/bin/just || \
+          curl -fsSL https://github.com/casey/just/releases/latest/download/just-aarch64-apple-darwin -o /usr/local/bin/just
+          chmod +x /usr/local/bin/just
+        # On Windows, just is installed via cargo below.
 
-      - name: Verify demo renders
+      - name: Install just (Windows)
+        if: runner.os == 'Windows'
+        run: cargo install just
+
+      - name: Run test suite (build → check-docs → inject/verify regression)
+        run: just test
+
+      - name: Smoke test — render via stdin
         run: |
-          ./target/release/mermaid-tui < demo/mermaid-to-md-demo.md > /dev/null || true
+          printf 'graph TD\n  A --> B --> C\n' | ./target/release/mermaid-tui
+
+  npm-pack:
+    name: Validate npm packaging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build release binary (for the host platform)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Place binary into the host platform package
+        run: |
+          PLATFORM=$(node -e "console.log(process.platform + '-' + process.arch)")
+          cp target/release/mermaid-tui "npm/$PLATFORM/bin/mermaid-tui"
+          chmod +x "npm/$PLATFORM/bin/mermaid-tui"
+
+      - name: npm pack (main + platform)
+        run: |
+          npm pack --silent
+          (cd npm/$(node -e "console.log(process.platform + '-' + process.arch)") && npm pack --silent)
+
+      - name: Install + smoke test via npm
+        run: |
+          PLATFORM=$(node -e "console.log(process.platform + '-' + process.arch)")
+          mkdir /tmp/install-test && cd /tmp/install-test
+          npm install --omit=optional \
+            $GITHUB_WORKSPACE/mermaid-to-md-*.tgz \
+            $GITHUB_WORKSPACE/npm/$PLATFORM/mermaid-to-md-*.tgz
+          printf 'graph TD\n  A --> B\n' | ./node_modules/.bin/mermaid-to-md

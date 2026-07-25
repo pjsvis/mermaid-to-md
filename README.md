@@ -30,6 +30,16 @@ echo 'graph TD\n  A --> B --> C' | ./target/release/mermaid-tui
 npx mermaid-to-md < diagram.mmd > out.md
 ```
 
+### From source (curl | sh, once a release is published)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/pjsvis/mermaid-to-md/main/install.sh | sh
+```
+
+Downloads the precompiled binary for your platform to `~/.local/bin`. No
+Node, no Rust toolchain — just the binary. (Use `--prefix /usr/local` or
+`--version 0.1.0` to customise.)
+
 ### Render to a markdown file
 
 ```bash
@@ -95,6 +105,17 @@ mermaid-to-md/
 ├── debriefs/               # session debriefs
 ├── decisions/              # decision records (positioning, scope)
 ├── playbooks/              # repeatable patterns (diagrams, video recording)
+├── .github/
+│   └── workflows/
+│       ├── ci.yml            # build + test + npm-pack validation on push
+│       └── release.yml       # tag-driven: 5-target build, npm publish, GitHub release
+├── npm/                     # platform packages (optional deps, ship precompiled binaries)
+│   ├── darwin-arm64/
+│   ├── darwin-x64/
+│   ├── linux-x64/
+│   ├── linux-arm64/
+│   └── win32-x64/
+├── install.sh               # curl | sh escape hatch for non-npm users
 ├── SYSTEM.md               # the Edinburgh Protocol (agent operating system)
 ├── DEPENDENCIES.md         # install instructions (macOS verified, Linux/Windows invited)
 ├── USAGE.md                # how to use: reasoning with baked state diagrams

@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # Build the binary for each platform, publish the platform npm package,
+  # and upload the binary as a release asset.
+  build-platform:
+    name: Build + publish (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-arm64
+            runner: macos-14        # arm64 runner
+            pkg: mermaid-to-md-darwin-arm64
+            bin: mermaid-tui
+          - target: darwin-x64
+            runner: macos-13        # x64 runner
+            pkg: mermaid-to-md-darwin-x64
+            bin: mermaid-tui
+          - target: linux-x64
+            runner: ubuntu-latest
+            pkg: mermaid-to-md-linux-x64
+            bin: mermaid-tui
+          - target: linux-arm64
+            runner: ubuntu-latest
+            pkg: mermaid-to-md-linux-arm64
+            bin: mermaid-tui
+          - target: win32-x64
+            runner: windows-latest
+            pkg: mermaid-to-md-win32-x64
+            bin: mermaid-tui.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-gnu
+        if: matrix.target == 'linux-arm64'
+
+      - name: Install Rust (native)
+        uses: dtolnay/rust-toolchain@stable
+        if: matrix.target != 'linux-arm64'
+
+      - name: Build (native)
+        if: matrix.target != 'linux-arm64'
+        run: cargo build --release
+
+      - name: Build (linux-arm64 cross)
+        if: matrix.target == 'linux-arm64'
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+          cargo build --release --target aarch64-unknown-linux-gnu
+          cp target/aarch64-unknown-linux-gnu/release/mermaid-tui target/release/mermaid-tui
+
+      - name: Place binary in platform package
+        shell: bash
+        run: |
+          mkdir -p npm/${{ matrix.target }}/bin
+          cp target/release/${{ matrix.bin }} npm/${{ matrix.target }}/bin/
+          chmod +x npm/${{ matrix.target }}/bin/${{ matrix.bin }} || true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish platform package
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          (cd npm/${{ matrix.target }} && npm version "$VERSION" --allow-same-version && npm publish --access public)
+
+      - name: Upload binary to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: npm/${{ matrix.target }}/bin/${{ matrix.bin }}
+
+  # After all platform packages are published, publish the main package.
+  publish-main:
+    name: Publish main npm package
+    needs: build-platform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish main package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          npm version "$VERSION" --allow-same-version
+          npm publish --access public
