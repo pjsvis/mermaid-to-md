@@ -1,5 +1,7 @@
 # Usage — reasoning with baked state diagrams
 
+*A whiteboard for you and your agents.*
+
 > A guide for humans using mermaid-to-md as a reasoning tool, not just a
 > renderer. Open in Glow (or `cat`) alongside a terminal for editing.
 

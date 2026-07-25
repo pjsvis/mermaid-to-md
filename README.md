@@ -1,5 +1,7 @@
 # mermaid-to-md
 
+*A whiteboard for you and your agents.*
+
 Render Mermaid diagrams to Unicode box-drawing art, baked into markdown files.
 
 ## The pitch
