@@ -27,8 +27,13 @@ build:
 
 # ── Test ──
 
-test: build
+# ── Test ──
+
+test: build check-docs
     @scripts/test-inject.sh
+
+check-docs:
+    @scripts/check-docs.sh
 
 # ── Mermaid rendering ──
 
