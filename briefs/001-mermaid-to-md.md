@@ -1,9 +1,9 @@
 # brief: mermaid-to-md — bake rendered Mermaid art into markdown for Glow viewing
 
 **Created:** 2026-07-23
-**Status:** pending
-**Depends on:** `mermaid-tui` binary (epic td-076e0a, complete — `src/cli/mermaid-tui/target/release/mermaid-tui`)
-**Sibling:** `2026-07-23-brief-mermaid-extract.md` (the inverse: extract *from* markdown → terminal)
+**Status:** ready to implement (td epic td-14ca22)
+**Depends on:** `mermaid-tui` binary — ✅ built (`target/release/mermaid-tui`)
+**Sibling:** `scripts/mermaid-extract.sh` (the inverse: extract *from* markdown → terminal)
 
 ## What
 

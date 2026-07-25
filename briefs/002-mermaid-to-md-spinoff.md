@@ -1,10 +1,10 @@
 # brief: mermaid-to-md — spin-off to standalone npm package
 
 **Created:** 2026-07-23
-**Status:** pending
-**Depends on:** `2026-07-23-brief-mermaid-to-md.md` (the tool design — Phase 1 bake, Phase 2 inject/verify)
-**Depends on:** `mermaid-tui` Rust binary (epic td-076e0a, complete — `src/cli/mermaid-tui/`)
-**Sibling:** `2026-07-23-brief-mermaid-extract.md` (moves with the spin-off)
+**Status:** Phase 1 complete (repo created, code migrated, binary builds). Phase 2+3 pending (td epic td-6e3b3a).
+**Depends on:** brief 001 (the tool design — bake/inject/verify wrapper)
+**Depends on:** `mermaid-tui` Rust binary — ✅ built in this repo
+**Sibling:** `scripts/mermaid-extract.sh` (moved with the spin-off)
 
 ## What
 
