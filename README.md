@@ -92,7 +92,7 @@ mermaid-to-md/
 │   └── mermaid-to-md-demo.md
 ├── briefs/                 # project specs
 ├── debriefs/               # session debriefs
-├── playbooks/              # repeatable patterns
+├── playbooks/              # repeatable patterns (diagrams, video recording)
 ├── SYSTEM.md               # the Edinburgh Protocol (agent operating system)
 ├── DEPENDENCIES.md         # install instructions (macOS verified, Linux/Windows invited)
 ├── USAGE.md                # how to use: reasoning with baked state diagrams
