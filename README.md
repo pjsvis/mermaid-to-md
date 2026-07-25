@@ -33,7 +33,7 @@ npx mermaid-to-md < diagram.mmd > out.md
 ### Render to a markdown file
 
 ```bash
-# Bake the art into a markdown file (standalone mode, to be implemented)
+# Bake the art into a markdown file
 scripts/mermaid-to-md.sh diagram.mmd -o diagram.md
 
 # View in Glow
@@ -52,8 +52,9 @@ glow demo/mermaid-to-md-demo.md
 ## Modes
 
 The binary (`mermaid-tui`) renders Mermaid source from stdin to Unicode art
-on stdout today. The three modes below are the wrapper layer
-(`scripts/mermaid-to-md.sh`) — planned, not yet implemented (brief 001).
+on stdout. The three modes below are the wrapper layer
+(`scripts/mermaid-to-md.sh`) — shipped (bake, inject, verify; `just test`
+runs the regression suite). npm packaging is pending (`td-6e3b3a`).
 
 | Mode | Command | What it does |
 |------|---------|--------------|
@@ -86,7 +87,7 @@ mermaid-to-md/
 ├── bin/
 │   └── mermaid-to-md.js    # JS wrapper for npm (placeholder, Phase 2)
 ├── scripts/
-│   ├── mermaid-to-md.sh    # bash wrapper — bake/inject/verify (planned)
+│   ├── mermaid-to-md.sh    # bash wrapper — bake/inject/verify (shipped)
 │   └── mermaid-extract.sh  # sibling: extract mmd from markdown → terminal
 ├── demo/
 │   └── mermaid-to-md-demo.md
