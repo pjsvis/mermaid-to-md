@@ -93,6 +93,7 @@ mermaid-to-md/
 ├── playbooks/              # repeatable patterns
 ├── SYSTEM.md               # the Edinburgh Protocol (agent operating system)
 ├── DEPENDENCIES.md         # install instructions (macOS verified, Linux/Windows invited)
+├── USAGE.md                # how to use: reasoning with baked state diagrams
 ├── agent-workflow-discussion.md  # dogfood: state diagram as comms channel
 └── README.md
 ```
