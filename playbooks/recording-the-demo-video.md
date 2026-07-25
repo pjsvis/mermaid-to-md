@@ -167,7 +167,7 @@ Before hitting record:
 | 0:25–0:40 | agent renders, bakes into markdown | press R — new diagram appears | The render: source → art → Glow refresh |
 | 0:40–0:55 | agent splits the diagram, re-renders | press R — two clean diagrams | The split: too complex → two small diagrams |
 | 0:55–1:05 | agent writes commentary about gaps | showing the two diagrams | The result: gaps surfaced by the diagram |
-| 1:05–1:15 | fade or hold | tagline overlay in post | "mermaid-to-md — a whiteboard for you and your agents" |
+| 1:05–1:15 | fade or hold | tagline overlay in post | "mermaid-to-md — state diagrams for agent–human discussion" |
 
 ### Recording
 
@@ -212,7 +212,7 @@ The tagline can be:
 ffmpeg text overlay (simple):
 
 ```bash
-ffmpeg -i demo.mp4 -vf "drawtext=text='mermaid-to-md — a whiteboard for you and your agents':fontsize=36:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,65,75)'" -c:a copy demo-tagged.mp4
+ffmpeg -i demo.mp4 -vf "drawtext=text='mermaid-to-md — state diagrams for agent–human discussion':fontsize=36:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,65,75)'" -c:a copy demo-tagged.mp4
 ```
 
 ### File size

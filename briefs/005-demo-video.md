@@ -12,7 +12,7 @@ action: a human and an AI agent discussing a system design using a baked
 state diagram. The video shows the draw → bake → view → discuss → redraw
 cycle, with the diagram updating in Glow as the agent re-renders.
 
-The tagline: **a whiteboard for you and your agents.**
+The tagline: **state diagrams for agent–human discussion.**
 
 ## Why
 
@@ -122,8 +122,8 @@ The video should tell a story, not just demo features. Proposed storyboard:
    split surfaces. "You can't hand off while blocked." "Phase isn't
    first-class in td." The diagram made these visible.
 
-6. **(0:01:05–0:01:15) The tagline** — fade to: **mermaid-to-md — a
-   whiteboard for you and your agents.**
+6. **(0:01:05–0:01:15) The tagline** — fade to: **mermaid-to-md — state
+   diagrams for agent–human discussion.**
 
 ## Acceptance criteria
 

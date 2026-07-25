@@ -1,6 +1,6 @@
 # mermaid-to-md
 
-*A whiteboard for you and your agents. A whiteboard in your terminal.*
+*State diagrams for agent–human discussion. Baked into markdown, visible anywhere.*
 
 Render Mermaid diagrams to Unicode box-drawing art, baked into markdown files.
 
@@ -92,6 +92,7 @@ mermaid-to-md/
 │   └── mermaid-to-md-demo.md
 ├── briefs/                 # project specs
 ├── debriefs/               # session debriefs
+├── decisions/              # decision records (positioning, scope)
 ├── playbooks/              # repeatable patterns (diagrams, video recording)
 ├── SYSTEM.md               # the Edinburgh Protocol (agent operating system)
 ├── DEPENDENCIES.md         # install instructions (macOS verified, Linux/Windows invited)
