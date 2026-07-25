@@ -2,11 +2,11 @@
 # mermaid-extract — extract ```mermaid blocks from markdown, render via mermaid-tui
 # Usage: mermaid-extract.sh <file> [block-number]
 set -euo pipefail
-BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/src/cli/mermaid-tui/target/release/mermaid-tui"
+BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/target/release/mermaid-tui"
 file="${1:?Usage: mermaid-extract.sh <file> [block-number]}"
 block_filter="${2:-}"
 [[ ! -f "$file" ]] && { echo "Error: not found: $file" >&2; exit 1; }
-[[ ! -x "$BIN" ]] && { echo "Error: build first: cd src/cli/mermaid-tui && cargo build --release" >&2; exit 1; }
+[[ ! -x "$BIN" ]] && { echo "Error: build first: cargo build --release" >&2; exit 1; }
 
 FENCE='```mermaid'
 current=0; in_mermaid=false; buffer=""; capturing_key=false; key=""
