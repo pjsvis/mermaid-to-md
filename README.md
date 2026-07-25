@@ -91,6 +91,8 @@ mermaid-to-md/
 ├── briefs/                 # project specs
 ├── debriefs/               # session debriefs
 ├── playbooks/              # repeatable patterns
+├── SYSTEM.md               # the Edinburgh Protocol (agent operating system)
+├── DEPENDENCIES.md         # install instructions (macOS verified, Linux/Windows invited)
 ├── agent-workflow-discussion.md  # dogfood: state diagram as comms channel
 └── README.md
 ```
