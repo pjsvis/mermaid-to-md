@@ -30,6 +30,7 @@ if [[ "$mode" == "inject" ]]; then
   state=TEXT; buf=""; blanks=""
   {
     while IFS= read -r line; do
+      line="${line%$'\r'}"   # tolerate CRLF line endings (td-b8d0d9)
       case "$state" in
         TEXT)
           if [[ "$line" == '```mmd'* || "$line" == '```mermaid'* ]]; then
@@ -95,6 +96,7 @@ if [[ "$mode" == "verify" ]]; then
   stale=0; line_no=0; mmd_line=0
   state=TEXT; buf=""; expected=""; actual=""
   while IFS= read -r line; do
+    line="${line%$'\r'}"     # tolerate CRLF line endings (td-b8d0d9)
     line_no=$((line_no+1))
     case "$state" in
       TEXT)

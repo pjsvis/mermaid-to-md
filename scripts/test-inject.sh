@@ -189,5 +189,32 @@ run_sut --verify "$TMP/does-not-exist.md"
 assert_exit "verify-missing-file nonzero exit" 1 "$LAST_RC"
 
 # =========================================================================
+# CRLF line endings (td-b8d0d9): Windows-authored files must not silently
+# fail. Before the fix, a trailing \r on the closing fence breaks the exact
+# match `[[ "$line" == '```' ]]` — inject drops all art (exit 0, no warning)
+# and verify misreports `unclosed-mmd`. Fix: strip trailing \r after read.
+# =========================================================================
+
+# 19. inject-crlf: a CRLF markdown file gets art injected (not silently dropped).
+f="$TMP/crlf-inj.md"
+printf '```mmd\r\ngraph TD\r\n  A --> B\r\n```\r\n' > "$f"
+run_sut --inject "$f"
+assert_exit     "inject-crlf exits 0"          0 "$LAST_RC"
+assert_contains "inject-crlf inserts sentinel" "$(cat "$f")" '<!-- mermaid-to-md:art -->'
+assert_contains "inject-crlf art has node B"   "$(cat "$f")" '│ B │'
+
+# 20. inject-crlf idempotent: re-running on the injected file doesn't duplicate.
+run_sut --inject "$f"
+assert_eq "inject-crlf idempotent single sentinel" 1 "$(count_lines 'mermaid-to-md:art' "$f")"
+
+# 21. verify-crlf: a CRLF mmd block with no art reports `missing`, not `unclosed-mmd`.
+f="$TMP/crlf-ver.md"
+printf '```mmd\r\ngraph TD\r\n  A --> B\r\n```\r\nplain\r\n' > "$f"
+run_sut --verify "$f"
+assert_exit         "verify-crlf-missing exits 1"     1 "$LAST_RC"
+assert_contains     "verify-crlf reports missing"     "$LAST_ERR" 'missing'
+assert_not_contains "verify-crlf not unclosed-mmd"    "$LAST_ERR" 'unclosed'
+
+# =========================================================================
 printf '\n# %d/%d assertions pass (%d fail)\n' "$PASS" "$NT" "$FAIL"
 [[ "$FAIL" -eq 0 ]]
