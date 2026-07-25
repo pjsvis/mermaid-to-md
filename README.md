@@ -1,6 +1,6 @@
 # mermaid-to-md
 
-*A whiteboard for you and your agents.*
+*A whiteboard for you and your agents. A whiteboard in your terminal.*
 
 Render Mermaid diagrams to Unicode box-drawing art, baked into markdown files.
 
