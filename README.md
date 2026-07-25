@@ -126,6 +126,15 @@ ships text. The contrast clarified the move; credit where it's due.
 
 ## License
 
-- **Wrapper layer** (`scripts/`, `bin/`) — MIT, © 2026 Peter Smith. See `LICENSE`.
+This repository is dual-licensed by component (see `NOTICE`):
+
+- **Wrapper layer** (`scripts/`, `bin/`, `src/main.rs`) — MIT, © 2026 Peter
+  Smith. See `LICENSE`.
 - **Renderer** (`src/mermaid.rs`) — Apache License 2.0, © 2023–2026 SpaceXAI,
   carried from `xai-org/grok-build` (see [Attribution](#attribution) above).
+  See `LICENSE-Apache-2.0.txt`.
+
+Prebuilt platform binaries (distributed as npm optional-dependency packages,
+e.g. `mermaid-to-md-darwin-arm64`) are derivative works of the Apache-2.0
+renderer and carry its terms; `NOTICE` and `LICENSE-Apache-2.0.txt`
+accompany them.

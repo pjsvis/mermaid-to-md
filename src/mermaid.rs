@@ -1,4 +1,32 @@
 #![allow(dead_code)]
+//! Copyright (c) 2023-2026 SpaceXAI.
+//!
+//! Licensed under the Apache License, Version 2.0 (the "License");
+//! you may not use this file except in compliance with the License.
+//! You may obtain a copy of the License at
+//!
+//!     http://www.apache.org/licenses/LICENSE-2.0
+//!
+//! Unless required by applicable law or agreed to in writing, software
+//! distributed under the License is distributed on an "AS IS" BASIS,
+//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//! See the License for the specific language governing permissions and
+//! limitations under the License.
+//!
+//! Source: https://github.com/xai-org/grok-build
+//!         crates/codegen/xai-grok-markdown/src/mermaid.rs
+//!
+//! Modification notice (Apache-2.0 §4(b)): the upstream module depends on
+//! `ratatui` for styled terminal output. This copy removes that dependency:
+//! the `ratatui::style` and `ratatui::text` imports are replaced with the
+//! inline no-op stubs below ("Style stubs (ratatui extraction)"), and the
+//! `styled_lines` field plus all span-construction logic are removed from
+//! `MermaidArt`, `Canvas::to_lines`, `render_fallback_box`, and the four
+//! diagram renderers. Only the `plain_lines` (plain `Vec<String>`) output
+//! path is retained; its output is byte-identical to upstream. Parsing,
+//! layout, edge routing, and the box-drawing canvas are otherwise unchanged.
+//! See `NOTICE` and `LICENSE-Apache-2.0.txt` in the repository root.
+//!
 //! Self-contained terminal renderer for Mermaid diagrams.
 //!
 //! Renders `graph`/`flowchart`, `sequenceDiagram`, and `stateDiagram` blocks
