@@ -1,0 +1,29 @@
+{
+  "name": "mermaid-to-md",
+  "version": "0.1.0",
+  "description": "Render Mermaid diagrams to Unicode box-drawing art, baked into markdown files.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pjsvis/mermaid-to-md.git"
+  },
+  "bin": {
+    "mermaid-to-md": "bin/mermaid-to-md.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no tests yet\" && exit 1"
+  },
+  "files": [
+    "bin/",
+    "scripts/"
+  ],
+  "optionalDependencies": {
+    "mermaid-to-md-darwin-arm64": "0.1.0",
+    "mermaid-to-md-darwin-x64": "0.1.0",
+    "mermaid-to-md-linux-x64": "0.1.0",
+    "mermaid-to-md-linux-arm64": "0.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

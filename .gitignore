@@ -1,0 +1,13 @@
+# Rust
+target/
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+
+# Editor
+.codegraph/
+.understand-anything/
+.crush/
