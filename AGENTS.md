@@ -5,6 +5,8 @@ MANDATORY: Use td for Task Management
 Run td usage --new-session at conversation start (or after /clear).
 Use td usage -q after first read.
 
+Run just orient to get an overview of the repo.
+
 ## What this repo is
 
 A CLI tool that renders Mermaid diagrams to Unicode box-drawing art and bakes
@@ -25,6 +27,6 @@ Rust source, `bin/` for the JS wrapper, `scripts/` for shell scripts.
 
 ## Bounded tasks & session newup discipline
 
-Work in bounded phases. At a phase boundary: `td handoff`, `/clear`, resume
+Work in bounded phases. At a phase boundary: `td handoff`, `/new`, resume
 from `td context`. Half a dozen newups in a long session is not excessive —
 it's the difference between O(n²) and O(n) cost.

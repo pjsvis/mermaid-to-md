@@ -49,6 +49,10 @@ glow demo/mermaid-to-md-demo.md
 
 ## Modes
 
+The binary (`mermaid-tui`) renders Mermaid source from stdin to Unicode art
+on stdout today. The three modes below are the wrapper layer
+(`scripts/mermaid-to-md.sh`) — planned, not yet implemented (brief 001).
+
 | Mode | Command | What it does |
 |------|---------|--------------|
 | **Bake** | `mermaid-to-md <file.mmd> -o <out.md>` | Render source → markdown file with art + source |
@@ -78,13 +82,14 @@ mermaid-to-md/
 │   ├── main.rs             # CLI entry point
 │   └── mermaid.rs          # the renderer (5,238 lines)
 ├── bin/
-│   └── mermaid-to-md.js    # JS wrapper for npm (to be written)
+│   └── mermaid-to-md.js    # JS wrapper for npm (placeholder, Phase 2)
 ├── scripts/
-│   ├── mermaid-to-md.sh    # bash wrapper (to be written)
+│   ├── mermaid-to-md.sh    # bash wrapper — bake/inject/verify (planned)
 │   └── mermaid-extract.sh  # sibling: extract mmd from markdown → terminal
 ├── demo/
 │   └── mermaid-to-md-demo.md
 ├── briefs/                 # project specs
+├── agent-workflow-discussion.md  # dogfood: state diagram as comms channel
 └── README.md
 ```
 

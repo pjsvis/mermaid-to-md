@@ -7,6 +7,9 @@ node_modules/
 # macOS
 .DS_Store
 
+# Transitory
+/draft-message-to-simon-willison.md
+
 # Editor
 .codegraph/
 .understand-anything/
