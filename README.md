@@ -89,6 +89,8 @@ mermaid-to-md/
 ├── demo/
 │   └── mermaid-to-md-demo.md
 ├── briefs/                 # project specs
+├── debriefs/               # session debriefs
+├── playbooks/              # repeatable patterns
 ├── agent-workflow-discussion.md  # dogfood: state diagram as comms channel
 └── README.md
 ```
