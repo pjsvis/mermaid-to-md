@@ -1,6 +1,22 @@
 # Dependencies
 
-## What you need
+## Viewing — no dependencies required
+
+The baked diagrams in this repo (e.g. `agent-workflow-discussion.md`,
+`demo/mermaid-to-md-demo.md`) are plain text in `text` code blocks. They
+render in **any** markdown viewer — no Mermaid renderer, plugin, or runtime
+required:
+
+- **GitHub** — renders `text` code blocks as monospace preformatted text
+- **glow** — terminal markdown viewer with nice rendering
+- **`cat`** — `cat agent-workflow-discussion.md`
+- **Any markdown renderer** — the art is in a fenced code block, not a
+  Mermaid block
+
+View before you commit to installing anything. Browse the repo on GitHub,
+or clone and `cat` a file. The output requires nothing.
+
+## Building — what you need
 
 | Dependency | Why | Required? |
 |-----------|-----|-----------|
@@ -8,11 +24,7 @@
 | **just** | Run the justfile recipes (`just orient`, `just demo`, etc.) | Optional — convenience commands |
 | **glow** | Preview markdown with baked diagrams in the terminal | Optional — any markdown viewer works |
 
-The baked diagrams are plain text in `text` code blocks. They render in
-**any** markdown viewer — GitHub, Glow, `cat`, any email client, any
-renderer. No Mermaid renderer, plugin, or runtime is required to *view* the
-output. The dependencies above are for *building* and *previewing*, not for
-viewing.
+The dependencies below are for *building* and *previewing*, not for viewing.
 
 ## macOS install (verified)
 
@@ -69,19 +81,6 @@ just demo
 # or
 glow demo/mermaid-to-md-demo.md
 ```
-
-## Viewing without dependencies
-
-The baked diagrams in this repo (e.g. `agent-workflow-discussion.md`,
-`demo/mermaid-to-md-demo.md`) are plain text. You can view them anywhere:
-
-- **GitHub** — renders `text` code blocks as monospace preformatted text
-- **`cat`** — `cat agent-workflow-discussion.md`
-- **Any markdown renderer** — the art is in a fenced code block, not a
-  Mermaid block
-
-You only need the dependencies above to *build* the binary or run the
-justfile recipes. Viewing the output requires nothing.
 
 ---
 
