@@ -101,6 +101,31 @@ mermaid-to-md/
 └── README.md
 ```
 
+## Attribution
+
+The Mermaid renderer (`src/mermaid.rs`, ~5,200 lines) is **not original to
+this repo**. It is copied from **xAI's open-sourced Grok CLI** —
+[`xai-org/grok-build`](https://github.com/xai-org/grok-build), at
+`crates/codegen/xai-grok-markdown/src/mermaid.rs` — the component Grok uses
+to draw mermaid blocks in the terminal. It is copyright 2023–2026 **SpaceXAI**
+and licensed under the **Apache License 2.0**.
+
+The `ratatui` dependency is the only modification: upstream uses `ratatui` for
+styled terminal output; this repo replaces it with inline no-op stubs (the
+"Style stubs (ratatui extraction)" block at the top of `mermaid.rs`) so the
+renderer depends on nothing but `unicode-width`. The parsing, layout, edge
+routing, and box-drawing canvas are upstream's work.
+
+**Simon Willison** inspired this port. His
+[`grok-mermaid`](https://simonwillison.net/2026/Jul/16/grok-mermaid/) tool
+compiled the same renderer to WebAssembly for an in-browser playground — the
+work that brought this renderer to our attention and takes the direction this
+repo plays against. Where Simon ships the renderer *to the browser* (WASM,
+view-time), this repo *bakes the art into markdown* at authoring time and
+ships text. The contrast clarified the move; credit where it's due.
+
 ## License
 
-MIT
+- **Wrapper layer** (`scripts/`, `bin/`) — MIT, © 2026 Peter Smith. See `LICENSE`.
+- **Renderer** (`src/mermaid.rs`) — Apache License 2.0, © 2023–2026 SpaceXAI,
+  carried from `xai-org/grok-build` (see [Attribution](#attribution) above).
