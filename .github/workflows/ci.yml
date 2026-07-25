@@ -24,13 +24,19 @@ jobs:
       - name: Build
         run: cargo build --release
 
-      - name: Install just (non-Windows)
-        if: runner.os != 'Windows'
+      - name: Install just (Linux)
+        if: runner.os == 'Linux'
         run: |
-          curl -fsSL https://github.com/casey/just/releases/latest/download/just-$(uname -m)-unknown-linux-musl -o /usr/local/bin/just || \
-          curl -fsSL https://github.com/casey/just/releases/latest/download/just-aarch64-apple-darwin -o /usr/local/bin/just
+          ARCH=$(uname -m)
+          curl -fsSL "https://github.com/casey/just/releases/latest/download/just-${ARCH}-unknown-linux-musl" -o /usr/local/bin/just
           chmod +x /usr/local/bin/just
-        # On Windows, just is installed via cargo below.
+
+      - name: Install just (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          ARCH=$(uname -m)
+          curl -fsSL "https://github.com/casey/just/releases/latest/download/just-${ARCH}-apple-darwin" -o /usr/local/bin/just
+          chmod +x /usr/local/bin/just
 
       - name: Install just (Windows)
         if: runner.os == 'Windows'
