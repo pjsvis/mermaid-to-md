@@ -103,10 +103,10 @@ mermaid-to-md --inject doc.md    → regenerate all art blocks in-place
 - [x] `mermaid-to-md.sh --inject <file.md>` finds `​```mmd` blocks and inserts/replaces art blocks after each
 - [x] Re-running `--inject` on the same file is idempotent (replaces, not duplicates)
 - [x] A sentinel convention marks injected art blocks (`<!-- mermaid-to-md:art -->` — see `decisions/002-sentinel-convention.md`) so they're detectable
-- [ ] `mermaid-to-md.sh --verify <file.md>` re-renders each `​```mmd` block and diffs against the existing art block
-- [ ] `--verify` exits 0 if all diagrams are fresh, exits 1 if any are stale (prints which are stale)
-- [ ] `--verify` ignores `​```text` blocks not marked with the sentinel (doesn't false-positive on manually-authored art)
-- [ ] `--verify` is CI-friendly (no side effects, clear exit code, machine-parseable output)
+- [x] `mermaid-to-md.sh --verify <file.md>` re-renders each `​```mmd` block and diffs against the existing art block
+- [x] `--verify` exits 0 if all diagrams are fresh, exits 1 if any are stale (prints which are stale)
+- [x] `--verify` ignores `​```text` blocks not marked with the sentinel (doesn't false-positive on manually-authored art)
+- [x] `--verify` is CI-friendly (no side effects, clear exit code, machine-parseable output)
 
 ## Out of scope
 

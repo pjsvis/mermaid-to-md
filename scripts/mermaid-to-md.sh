@@ -3,16 +3,18 @@
 # Usage:
 #   mermaid-to-md.sh [<file.mmd>|-] [--title "T"] [-o <out.md>]   # bake
 #   mermaid-to-md.sh --inject <file.md> [-o <out.md>]             # inject
+#   mermaid-to-md.sh --verify <file.md>                          # verify (CI)
 set -euo pipefail
 BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/target/release/mermaid-tui"
 mode="bake"; inject_file=""; title=""; outfile=""; infile=""
 while (( $# )); do
   case "$1" in
     --inject)     mode="inject"; inject_file="${2:?--inject needs a file}"; shift 2;;
+    --verify)     mode="verify"; verify_file="${2:?--verify needs a file}"; shift 2;;
     --title)      title="${2:?--title needs a value}";   shift 2;;
     -o|--output)  outfile="${2:?-o needs a value}";       shift 2;;
     -)            infile="-";                              shift;;
-    -*)           echo "Usage: $0 [<file.mmd>|-] [--title T] [-o out] | --inject <file.md> [-o out]" >&2; exit 2;;
+    -*)           echo "Usage: $0 [<file.mmd>|-] [--title T] [-o out] | --inject <file.md> [-o out] | --verify <file.md>" >&2; exit 2;;
     *)            infile="$1";                             shift;;
   esac
 done
@@ -78,6 +80,74 @@ if [[ "$mode" == "inject" ]]; then
     if [[ "$state" == AFTER_MMD && -n "$blanks" ]]; then printf '%s' "$blanks"; fi
   } > "$tmp"
   if [[ -n "$outfile" ]]; then mv "$tmp" "$outfile"; else mv "$tmp" "$file"; fi
+  exit 0
+fi
+
+# --- verify mode: re-render each ```mmd, diff against sentinel-marked art ---
+# CI-friendly: no side effects. Exit 0 if all fresh, 1 if any stale/missing.
+# Output to stderr: <file>:<line>: <status>  (stale | missing | unclosed-mmd | unclosed-text)
+# Governs ```mmd blocks only; ```mermaid is GitHub's domain (run --inject to
+# convert). ```text blocks without a sentinel are user content — not checked.
+# A ```mmd with no following managed region is reported `missing` (run --inject).
+if [[ "$mode" == "verify" ]]; then
+  file="$verify_file"
+  [[ -f "$file" ]] || { echo "Error: not found: $file" >&2; exit 1; }
+  stale=0; line_no=0; mmd_line=0
+  state=TEXT; buf=""; expected=""; actual=""
+  while IFS= read -r line; do
+    line_no=$((line_no+1))
+    case "$state" in
+      TEXT)
+        if [[ "$line" == '```mmd'* ]]; then state=IN_MMD; buf=""; mmd_line="$line_no"
+        elif [[ "$line" == '```'* ]]; then state=IN_CODE; fi
+        ;;
+      IN_CODE)       # non-mmd code block (incl. unmarked ```text): skip verbatim
+        [[ "$line" == '```' ]] && state=TEXT
+        ;;
+      IN_MMD)
+        if [[ "$line" == '```' ]]; then
+          expected="$(printf '%s' "$buf" | "$BIN" || true)"; state=AFTER_MMD
+        else buf="${buf}${line}"$'\n'; fi
+        ;;
+      AFTER_MMD)     # skip blanks, expect the sentinel
+        if [[ "$line" == '<!-- mermaid-to-md:art -->' ]]; then state=SKIP_SENTINEL
+        elif [[ "$line" =~ ^[[:space:]]*$ ]]; then :
+        elif [[ "$line" == '```mmd'* ]]; then
+          printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1
+          state=IN_MMD; buf=""; mmd_line="$line_no"
+        elif [[ "$line" == '```'* ]]; then
+          printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1; state=IN_CODE
+        else
+          printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1; state=TEXT
+        fi
+        ;;
+      SKIP_SENTINEL) # expect ```text; else sentinel is orphaned -> missing
+        if [[ "$line" == '```text' ]]; then state=SKIP_TEXT; actual=""
+        elif [[ "$line" =~ ^[[:space:]]*$ ]]; then :
+        elif [[ "$line" == '```mmd'* ]]; then
+          printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1
+          state=IN_MMD; buf=""; mmd_line="$line_no"
+        elif [[ "$line" == '```'* ]]; then
+          printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1; state=IN_CODE
+        else
+          printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1; state=TEXT
+        fi
+        ;;
+      SKIP_TEXT)     # collect actual art until its closing fence, then diff
+        if [[ "$line" == '```' ]]; then
+          actual="${actual%$'\n'}"
+          [[ "$actual" != "$expected" ]] && { printf '%s:%d: stale\n' "$file" "$mmd_line" >&2; stale=1; }
+          state=TEXT
+        else actual="${actual}${line}"$'\n'; fi
+        ;;
+    esac
+  done < "$file"
+  case "$state" in
+    AFTER_MMD|SKIP_SENTINEL) printf '%s:%d: missing\n' "$file" "$mmd_line" >&2; stale=1;;
+    IN_MMD)    printf '%s:%d: unclosed-mmd\n' "$file" "$mmd_line" >&2; stale=1;;
+    SKIP_TEXT) printf '%s:%d: unclosed-text\n' "$file" "$mmd_line" >&2; stale=1;;
+  esac
+  [[ "$stale" -ne 0 ]] && exit 1
   exit 0
 fi
 
