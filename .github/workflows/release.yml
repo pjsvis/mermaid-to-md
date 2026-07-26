@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write   # softprops/action-gh-release needs this to create the release (B4)
+
 jobs:
   # Build the binary for each platform, publish the platform npm package,
   # and upload the binary as a release asset.
@@ -107,5 +110,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          npm version "$VERSION" --allow-same-version
+          # Set the main version AND its optionalDependencies pins to $VERSION.
+          # npm version alone does not bump optionalDependencies — without this
+          # the main package would republish with stale platform pins (E1).
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version=process.argv[1];for(const k of Object.keys(p.optionalDependencies||{}))p.optionalDependencies[k]=process.argv[1];fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');" "$VERSION"
           npm publish --access public

@@ -38,7 +38,7 @@ curl -fsSL https://raw.githubusercontent.com/pjsvis/mermaid-to-md/main/install.s
 
 Downloads the precompiled binary for your platform to `~/.local/bin`. No
 Node, no Rust toolchain — just the binary. (Use `--prefix /usr/local` or
-`--version 0.1.0` to customise.)
+`--version <version>` to customise; defaults to the latest release.)
 
 ### Render to a markdown file
 

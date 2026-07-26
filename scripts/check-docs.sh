@@ -7,9 +7,9 @@
 # reality they describe.
 #
 # Allowlist: lines matching $ALLOW are legitimate pending items (currently:
-# npm packaging, td-6e3b3a). When a pending item ships, remove its allowlist
-# entry — any leftover placeholder language then fails the check. The
-# allowlist rotting IS the signal to update the docs.
+# npm publishing, not yet on the registry). When the first npm release is
+# published, remove its allowlist entry — any leftover placeholder language
+# then fails the check. The allowlist rotting IS the signal to update the docs.
 #
 # CI-friendly: exits 0 if docs are current, 1 if any stale markers remain.
 set -uo pipefail
@@ -19,7 +19,7 @@ cd "$ROOT"
 
 DOCS=(about.md README.md USAGE.md)
 # Currently-legitimate pending: npm publishing (not yet on the registry).
-# When td-6e3b3a Phase 3 ships publishing, drop this and fix any remaining hits.
+# When the first npm release is published, drop this and fix any remaining hits.
 ALLOW='once published|npm packaging is pending|npx mermaid-to-md'
 
 STALE='to be written|to be implemented|not yet implemented|\(planned\)|planned, not yet'
