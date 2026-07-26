@@ -93,7 +93,7 @@ mermaid-to-md/
 ├── Cargo.toml              # the Rust binary (mermaid-tui)
 ├── src/
 │   ├── main.rs             # CLI entry point
-│   └── mermaid.rs          # the renderer (5,238 lines)
+│   └── mermaid.rs          # the renderer (5,229 lines)
 ├── bin/
 │   └── mermaid-to-md.js    # JS wrapper for npm — bake/inject/verify (cross-platform)
 ├── scripts/

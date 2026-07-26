@@ -26,7 +26,7 @@ Neither *persists* the rendered art. The terminal output is ephemeral — you re
 
 This tool closes the gap. Render the art once, bake it into a markdown file, and the file is now self-contained: anyone with Glow (or `cat`, or any text viewer) sees the diagram without a Mermaid renderer. The diagram is plain text — diffable in git, greppable, copy-pasteable, no binary blobs, no SVG pipeline.
 
-**The use case:** design docs, architecture notes, README diagrams that should be readable in the terminal, not just on GitHub. The "diagrams for docs" brief (`2026-07-23-brief-mermaid-diagrams-for-docs.md`) authors Mermaid *source* in markdown for GitHub's renderer. This tool serves the other audience — terminal-native readers who use Glow.
+**The use case:** design docs, architecture notes, README diagrams that should be readable in the terminal, not just on GitHub. The "diagrams for docs" brief (in `cool-pi-extensions` — external) authors Mermaid *source* in markdown for GitHub's renderer. This tool serves the other audience — terminal-native readers who use Glow.
 
 ## How
 
@@ -39,7 +39,7 @@ This tool closes the gap. Render the art once, bake it into a markdown file, and
 - Emits a markdown file to stdout (or `-o <file>`) containing:
   - An optional H1/H2 heading (from a `--title` flag, or derived from the input filename)
   - A fenced `​```text` block with the rendered art
-  - The original Mermaid source in a fenced `​```mmd` block (collapsible `<details>` optional, for readers who want the source)
+  - The original Mermaid source in a fenced `​```mmd` block
 
 **Why include the source, and why NOT in a `​```mermaid` block?** The baked art is the *product* — the canonical diagram, viewer-agnostic. The source is the *input*, preserved for regeneration and reference. But the source must NOT go in a `​```mermaid` fence, because GitHub renders that as a *second, live diagram* — visual collision. Two diagrams for one. The art block is the diagram; the source block is reference material, not a parallel render.
 
@@ -56,14 +56,9 @@ GitHub's Mermaid renderer triggers on exactly one info string: `mermaid`. Any ot
 <rendered unicode art>
 ```
 
-<details>
-<summary>Mermaid source</summary>
-
 ```mmd
 <source>
 ```
-
-</details>
 ````
 
 ### Phase 2 (gated): In-place injection into existing markdown
@@ -119,9 +114,9 @@ mermaid-to-md --inject doc.md    → regenerate all art blocks in-place
 
 ## Relationship to existing briefs
 
-- **`mermaid-extract.md`** (sibling): the inverse operation. Extract reads `​```mermaid` *from* markdown and renders to the *terminal*. `mermaid-to-md` reads Mermaid *from* a source file and writes rendered art *to* markdown. One round-trips source→terminal, the other source→markdown. Both are thin wrappers over the same binary.
-- **`mermaid-diagrams-for-docs.md`**: authors Mermaid *source* in `​```mermaid` blocks for GitHub's renderer. **Deliberately different audience.** That brief serves web readers (GitHub's live SVG). This tool serves terminal readers (Glow's plain-text art). A doc should NOT carry both fence types for the same diagram — that causes visual collision on GitHub (art block + live render = two diagrams). If a doc needs both audiences, the Phase 2 injection mode appends the art block but **converts the source fence from `​```mermaid` to `​```mmd`** so GitHub stops rendering it. One diagram per viewer, not two.
-- **`go-mermaid-renderer-01.md`**: the binary this tool depends on. Already built.
+- **`mermaid-extract.md`** (sibling, in `cool-pi-extensions` — external; the script `scripts/mermaid-extract.sh` is local): the inverse operation. Extract reads `​```mermaid` *from* markdown and renders to the *terminal*. `mermaid-to-md` reads Mermaid *from* a source file and writes rendered art *to* markdown. One round-trips source→terminal, the other source→markdown. Both are thin wrappers over the same binary.
+- **`mermaid-diagrams-for-docs.md`** (in `cool-pi-extensions` — external): authors Mermaid *source* in `​```mermaid` blocks for GitHub's renderer. **Deliberately different audience.** That brief serves web readers (GitHub's live SVG). This tool serves terminal readers (Glow's plain-text art). A doc should NOT carry both fence types for the same diagram — that causes visual collision on GitHub (art block + live render = two diagrams). If a doc needs both audiences, the Phase 2 injection mode appends the art block but **converts the source fence from `​```mermaid` to `​```mmd`** so GitHub stops rendering it. One diagram per viewer, not two.
+- **`go-mermaid-renderer-01.md`** (in `cool-pi-extensions` — external): the binary this tool depends on. Already built.
 
 ## The opinion
 

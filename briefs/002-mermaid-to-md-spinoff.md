@@ -35,7 +35,7 @@ mermaid-to-md/                       # new standalone repo
 ├── Cargo.toml                       # the mermaid-tui binary (moved from cool-pi-extensions)
 ├── src/
 │   ├── main.rs                      # CLI entry point
-│   └── mermaid.rs                   # the renderer (5,238 lines, already decoupled from ratatui)
+│   └── mermaid.rs                   # the renderer (5,229 lines, already decoupled from ratatui)
 ├── bin/
 │   └── mermaid-to-md.js             # JS CLI wrapper (~40 lines, replaces bash for npm)
 ├── scripts/
@@ -61,12 +61,12 @@ mermaid-to-md/                       # new standalone repo
 
 - `src/cli/mermaid-tui/` (the Rust binary: `Cargo.toml`, `src/main.rs`, `src/mermaid.rs`)
 - `scripts/mermaid-extract.sh` (the sibling extractor)
-- The `mermaid-to-md.sh` script (to be written per the parent brief, Phase 1)
+- The `mermaid-to-md.sh` script (shipped — bake/inject/verify, per parent brief Phases 1–3)
 - The demo file `mermaid-to-md-demo.md` (becomes the README example)
 
 ### What stays in cool-pi-extensions
 
-- The briefs (`2026-07-23-brief-mermaid-*.md`) — they're part of this repo's decision record
+- The briefs (moved with the spin-off to `briefs/001`–`briefs/008` here) — they're part of this repo's decision record
 - The `just mermaid` recipe (can call the npm-installed binary or the local build)
 - Any Pi extension bridge (separate concern, gated on actual Pi integration demand)
 
@@ -111,7 +111,7 @@ WASM is not deferred or gated — it is **rejected** for the baked-art product. 
 
 The baked art is a `​```text` block — `<pre><code>` with a monospace font in every browser. The 16 non-ASCII characters used (box-drawing block U+2500–U+257F, geometric shapes U+25A0–U+25FF) are covered by every modern monospace font. The browser displays the art identically to the terminal, with no runtime, no renderer, no client-side computation. WASM adds cost to solve a problem the bake step already eliminated.
 
-**The one narrow exception:** browser-based *live preview* (editing `.mmd` source in a web editor, seeing art update in real-time). The browser can't shell out to a native binary, so WASM is the only way to run the renderer client-side. But that's a different product (see `2026-07-23-brief-mermaid-live-preview.md`), a different audience (browser editors, not terminal editors), and it's parked. WASM is justified *there*, not here. Confusing the two is the error — the bake step makes WASM superfluous for batch rendering; only interactive browser preview needs it.
+**The one narrow exception:** browser-based *live preview* (editing `.mmd` source in a web editor, seeing art update in real-time). The browser can't shell out to a native binary, so WASM is the only way to run the renderer client-side. But that's a different product (see `briefs/003-mermaid-live-preview.md`), a different audience (browser editors, not terminal editors), and it's parked. WASM is justified *there*, not here. Confusing the two is the error — the bake step makes WASM superfluous for batch rendering; only interactive browser preview needs it.
 
 ## Acceptance criteria
 
@@ -123,7 +123,7 @@ The baked art is a `​```text` block — `<pre><code>` with a monospace font in
 - [ ] `bin/mermaid-to-md.js` works identically to the bash script
 - [ ] `scripts/mermaid-extract.sh` works in the new repo
 - [ ] README includes the demo (3 diagram types rendering in Glow)
-- [ ] No references to Pi, Edinburgh Protocol, or `cool-pi-extensions` in the new repo
+- [ ] No *runtime* dependency on Pi or `cool-pi-extensions` in the new repo (`SYSTEM.md` is carried deliberately as a reference to the Edinburgh Protocol, not a runtime dependency)
 
 ### Phase 2
 
@@ -145,7 +145,7 @@ The baked art is a `​```text` block — `<pre><code>` with a monospace font in
 
 ## Out of scope
 
-- **WASM build** — rejected for this product (see above). The bake step renders at authoring time; the browser displays static text. WASM re-introduces a runtime to produce bytes that are already in the file. The only remaining WASM case is browser-based live preview — a different product, parked in `2026-07-23-brief-mermaid-live-preview.md`
+- **WASM build** — rejected for this product (see above). The bake step renders at authoring time; the browser displays static text. WASM re-introduces a runtime to produce bytes that are already in the file. The only remaining WASM case is browser-based live preview — a different product, parked in `briefs/003-mermaid-live-preview.md`
 - **Pi extension bridge** — the tool is standalone; any Pi integration is a separate brief in `cool-pi-extensions`
 - **Homebrew tap** — npm + curl install covers the audience; Homebrew can be added later if demand exists
 - **Windows `install.sh`** — a PowerShell installer is a separate concern; the npm path works on Windows already
@@ -155,8 +155,8 @@ The baked art is a `​```text` block — `<pre><code>` with a monospace font in
 
 ## Relationship to existing briefs
 
-- **`mermaid-to-md.md`** (parent): defines the tool's behaviour (bake, inject, verify). This brief defines the distribution. The parent brief's acceptance criteria still apply — this brief adds packaging and CI.
-- **`mermaid-extract.md`** (sibling): moves to the new repo. Same binary, inverse operation. Ships in the same npm package (or as a separate command — `mermaid-to-md extract <file>` as a subcommand, or a separate `mermaid-extract` package).
+- **`briefs/001-mermaid-to-md.md`** (parent): defines the tool's behaviour (bake, inject, verify). This brief defines the distribution. The parent brief's acceptance criteria still apply — this brief adds packaging and CI.
+- **`mermaid-extract.md`** (sibling — no brief migrated; the script `scripts/mermaid-extract.sh` is local): Same binary, inverse operation. Ships in the same npm package (or as a separate command — `mermaid-to-md extract <file>` as a subcommand, or a separate `mermaid-extract` package).
 - **`go-mermaid-renderer-01.md`**: the binary's origin brief. Stays in `cool-pi-extensions` as the decision record. The code moves.
 - **`mermaid-diagrams-for-docs.md`**: stays in `cool-pi-extensions`. That brief is about authoring Mermaid *source* in this repo's docs. The spin-off doesn't affect it — if anything, the spin-off's `--inject` mode could be used to bake art into this repo's docs later.
 
@@ -166,4 +166,12 @@ The baked art is a `​```text` block — `<pre><code>` with a monospace font in
 
 ## The moat question
 
-"Can you name your secrets?" The secret is the 5,238-line Rust renderer — graph layout, edge routing, crossing minimisation, Mermaid parsing. It already exists, already works, already compiles standalone. The packaging (npm wrapper, CI matrix, platform binaries) is commodity infrastructure. The moat is the renderer; the distribution is the channel. This brief builds the channel.
+"Can you name your secrets?" The secret is the 5,229-line Rust renderer — graph layout, edge routing, crossing minimisation, Mermaid parsing. It already exists, already works, already compiles standalone. The packaging (npm wrapper, CI matrix, platform binaries) is commodity infrastructure. The moat is the renderer; the distribution is the channel. This brief builds the channel.
+
+> **Superseded on this point by `decisions/001` (2026-07-25).** On reflection
+> the renderer is the *how/channel*, not the moat — the moat is the *practice*
+> (agent and human drawing a state diagram together, where the formality
+> surfaces the gaps prose hides). The rendering is replicable in a weekend; the
+> practice is not. This section is retained as the brief's original reasoning;
+> `decisions/001` corrects the moat answer. The channel-building conclusion
+> stands regardless — the distribution is still not the moat.

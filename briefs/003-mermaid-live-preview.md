@@ -2,7 +2,7 @@
 
 **Created:** 2026-07-23
 **Status:** parked
-**Gated on:** `mermaid-to-md` npm package shipping (brief `2026-07-23-brief-mermaid-to-md-spinoff.md`)
+**Gated on:** `mermaid-to-md` npm package shipping (brief `briefs/002-mermaid-to-md-spinoff.md`)
 **Needs:** more thought — this brief captures the idea and the design space, not a build plan
 
 ## What
