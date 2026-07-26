@@ -46,6 +46,7 @@ jobs:
         run: just test
 
       - name: Smoke test — render via stdin
+        shell: bash
         run: |
           printf 'graph TD\n  A --> B --> C\n' | ./target/release/mermaid-tui
 

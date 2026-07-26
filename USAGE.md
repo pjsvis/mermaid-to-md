@@ -48,6 +48,20 @@ plugin. The diagram and the prose about the diagram stay on the same scroll.
 
 ## The cycle
 
+```mmd
+stateDiagram-v2
+    [*] --> Draw
+    Draw --> View: bake, open Glow
+    View --> Discuss: read diagram
+    Discuss --> Redraw: gap found
+    Discuss --> Done: it shows what is going on
+    Redraw --> Bake: update mmd source
+    Bake --> View: re-render, press R
+    Draw --> Done: first attempt suffices
+    Done --> [*]
+```
+
+<!-- mermaid-to-md:art -->
 ```text
             ╭───╮
             │ ● │
@@ -78,24 +92,6 @@ plugin. The diagram and the prose about the diagram stay on the same scroll.
  │ Bake ├──────│ ● │──────────────────────────┘
  ╰──────╯      ╰───╯
 ```
-
-<details>
-<summary>Mermaid source</summary>
-
-```mmd
-stateDiagram-v2
-    [*] --> Draw
-    Draw --> View: bake, open Glow
-    View --> Discuss: read diagram
-    Discuss --> Redraw: gap found
-    Discuss --> Done: it shows what is going on
-    Redraw --> Bake: update mmd source
-    Bake --> View: re-render, press R
-    Draw --> Done: first attempt suffices
-    Done --> [*]
-```
-
-</details>
 
 1. **Draw.** Write Mermaid source for the system you're reasoning about.
    The first diagram does not need to be right. It needs to portray *some
@@ -164,17 +160,68 @@ can't handle is a diagram trying to be two diagrams. Don't persevere with
 complexity. Give the tool smaller jobs. This is the same anti-entropy
 principle as bounded work: when the unit is too big, split it.
 
+## Two signals, two remedies
+
+The split lesson above is a *spatial* signal: the renderer can't route
+the topology, so labels collide and edges merge. There is a second,
+*structural* signal that the source-first layout exposes — and it has a
+different remedy.
+
+A baked diagram is two views of the same thing on one scroll: the
+`​```mmd` source (the terse generative form) followed by the `​```text`
+art (the committed spatial claim). The source is a **complexity meter**
+you scan before reading the art. If the source is long, the diagram is
+structurally complex — too many events for one picture. The art can
+*flatter* a complex diagram: a sequence diagram packs messages into a
+column, so ten source lines collapse to a compact grid, and the layout
+hides the weight the source declares. Reading source-first means the
+meter surfaces before the claim can tidy it away.
+
+The two signals and their remedies:
+
+- **Spatial** — the renderer struggles (collisions, merged edges). Remedy:
+  split by routing. The topology is tangled; give it smaller graphs.
+- **Structural** — the source is long. Remedy: split by sub-system. Too
+  many events are in one picture; decompose the system, not the layout.
+
+One caveat: source length is confounded by **long labels**. A state
+diagram with five transitions but sentence-long labels has a long source
+and low structural complexity — the remedy is shorter labels, not
+splitting. Count edges and states, not characters. Many short lines is
+structurally complex; few long lines is lexically lazy. Different fixes.
+
+This is why the source is left flat, not collapsed behind a `<details>`
+tag. Hiding the source hides the meter — the reader has to *ask* to see
+the complexity rather than having it surface. The flat layout makes the
+source a scannable first-glance check; the wrapper made it opt-in.
+
 ## Quick reference
 
 ```bash
-# Render Mermaid source to Unicode art
+# Render Mermaid source to Unicode art (the raw binary)
 echo 'stateDiagram-v2
     [*] --> A
     A --> B: event
     B --> [*]' | ./target/release/mermaid-tui
+
+# Bake: render a .mmd source file into a standalone markdown file
+mermaid-to-md diagram.mmd -o diagram.md
+
+# Inject: render every ```mmd block in a markdown file, in place
+mermaid-to-md --inject doc.md
+
+# Verify: re-render every ```mmd block, fail if the baked art is stale
+mermaid-to-md --verify doc.md
 
 # View a baked document in Glow
 glow agent-workflow-discussion.md
 
 # In Glow, press R to refresh after the file changes
 ```
+
+Bake and inject produce the same shape — a ```mmd source block followed by a
+`<!-- mermaid-to-md:art -->` sentinel and the ```text art. A baked file is a
+valid inject file: re-inject is idempotent, and `--verify` checks both. Verify
+governs any ```mmd block that has — or should have — a following sentinel+art
+region; ```text blocks with no sentinel are user content, left untouched. (See
+`decisions/003-verify-scope.md`.)

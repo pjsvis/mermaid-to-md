@@ -229,7 +229,8 @@ if (src.trim() === '') {
 const art = render(src);
 let output = '';
 if (title) output += '# ' + title + '\n\n';
-output += '```text\n' + art + '\n```\n\n';
-output += '<details>\n<summary>Mermaid source</summary>\n\n```mmd\n' + src + '\n```\n\n</details>\n';
+// Source-first, with the sentinel — same managed pair as inject (decisions/003).
+// A baked file is a valid inject artifact: re-inject idempotent, --verify fresh.
+output += '```mmd\n' + src + '\n```\n\n<!-- mermaid-to-md:art -->\n```text\n' + art + '\n```\n';
 writeOut(output);
 process.exit(0);

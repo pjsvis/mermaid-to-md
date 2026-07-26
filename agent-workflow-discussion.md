@@ -2,7 +2,7 @@
 
 > Rendered with `mermaid-tui`, baked into this file. Open in Glow (or `cat`)
 > to see the diagram. No Mermaid renderer required. The art is the product;
-> the source below is reference material.
+> the source is reference material.
 
 This document is a conversation piece, not a spec. It models the **td + briefs
 workflow** that the agent and the human use to manage work in this repo, as a
@@ -10,6 +10,23 @@ state diagram — then surfaces what the diagram reveals.
 
 ## The diagram
 
+```mmd
+stateDiagram-v2
+    [*] --> Unstarted
+    Unstarted --> Oriented: td usage --new-session
+    Oriented --> Working: td usage -q, pick task
+    Working --> Blocked: need human input
+    Blocked --> Working: human responds
+    Blocked --> Stuck: no response in N
+    Working --> Handoff: phase boundary, td handoff
+    Handoff --> Compacted: /new
+    Compacted --> Oriented: td context resume
+    Working --> Done: task complete, debrief
+    Done --> [*]
+    Stuck --> [*]: abandon
+```
+
+<!-- mermaid-to-md:art -->
 ```text
                  ╭───╮
                  │ ● │
@@ -38,34 +55,13 @@ state diagram — then surfaces what the diagram reveals.
                ▼no response i▼/N                         │ │
            ╭───────╮   ╭───────────╮                     │ │
            │ Stuck │   │ Compacted ├─────────────────────┘ │
-           ╰───┬───╯   ╰───────────╘                       │
+           ╰───┬───╯   ╰───────────╯                       │
                └──────┐                                    │
                       ▼abandon                             │
                     ╭───╮                                  │
                     │ ● │◄─────────────────────────────────┘
                     ╰───╯
 ```
-
-<details>
-<summary>Mermaid source</summary>
-
-```mmd
-stateDiagram-v2
-    [*] --> Unstarted
-    Unstarted --> Oriented: td usage --new-session
-    Oriented --> Working: td usage -q, pick task
-    Working --> Blocked: need human input
-    Blocked --> Working: human responds
-    Blocked --> Stuck: no response in N
-    Working --> Handoff: phase boundary, td handoff
-    Handoff --> Compacted: /new
-    Compacted --> Oriented: td context resume
-    Working --> Done: task complete, debrief
-    Done --> [*]
-    Stuck --> [*]: abandon
-```
-
-</details>
 
 ## What the diagram is
 
@@ -161,6 +157,18 @@ and it was right.
 
 ### Diagram 2a: Epic creation (linear, no cycles)
 
+```mmd
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> EpicRequested: human asks
+    EpicRequested --> EpicCreated: td epic create
+    EpicCreated --> PhaseLoop: pick phase 1
+    PhaseLoop --> EpicDone: all phases done
+    EpicDone --> [*]: debrief
+    Idle --> [*]: no work
+```
+
+<!-- mermaid-to-md:art -->
 ```text
        ╭───╮
        │ ● │
@@ -179,7 +187,7 @@ and it was right.
          ▼td epic create   │
   ╭─────────────╮          │
   │ EpicCreated │          │
-  ╰────┬────────╯          │
+  ╰──────┬──────╯          │
          │                 │
          ▼pick phase 1     │
    ╭───────────╮           │
@@ -197,22 +205,6 @@ and it was right.
        ╰───╯
 ```
 
-<details>
-<summary>Mermaid source</summary>
-
-```mmd
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> EpicRequested: human asks
-    EpicRequested --> EpicCreated: td epic create
-    EpicCreated --> PhaseLoop: pick phase 1
-    PhaseLoop --> EpicDone: all phases done
-    EpicDone --> [*]: debrief
-    Idle --> [*]: no work
-```
-
-</details>
-
 This is the outer machine. `PhaseLoop` is a placeholder for the inner cycle
 — the box the next diagram opens. The key observation: **`EpicRequested` is
 a human-driven transition.** The agent does not create epics on its own; the
@@ -222,6 +214,18 @@ agent could self-epic, that state would collapse. It shouldn't.
 
 ### Diagram 2b: The phase loop (the newup cycle)
 
+```mmd
+stateDiagram-v2
+    [*] --> Working
+    Working --> Handoff: phase done
+    Handoff --> Compacted: /new
+    Compacted --> Working: td context
+    Working --> Blocked: blocked
+    Blocked --> Working: unblocked
+    Working --> [*]: all phases done
+```
+
+<!-- mermaid-to-md:art -->
 ```text
                   ╭───╮
                   │ ● │
@@ -242,22 +246,6 @@ agent could self-epic, that state would collapse. It shouldn't.
  │ Compacted ├────────────────────────────────────┘
  ╰───────────╯
 ```
-
-<details>
-<summary>Mermaid source</summary>
-
-```mmd
-stateDiagram-v2
-    [*] --> Working
-    Working --> Handoff: phase done
-    Handoff --> Compacted: /new
-    Compacted --> Working: td context
-    Working --> Blocked: blocked
-    Blocked --> Working: unblocked
-    Working --> [*]: all phases done
-```
-
-</details>
 
 This is the inner machine — the same `Working → Handoff → Compacted →
 Oriented` loop from diagram 1, but now seen as the *content of a single

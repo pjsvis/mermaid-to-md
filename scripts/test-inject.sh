@@ -216,5 +216,30 @@ assert_contains     "verify-crlf reports missing"     "$LAST_ERR" 'missing'
 assert_not_contains "verify-crlf not unclosed-mmd"    "$LAST_ERR" 'unclosed'
 
 # =========================================================================
+# Bake mode (B1, brief 007 / decisions/003): bake and inject share one output
+# shape — a baked file is a valid inject artifact with a sentinel+art region
+# after each mmd. Before the unify, bake wrapped mmd in <details> with no
+# following region, so --verify reported `missing` at every baked diagram.
+# =========================================================================
+
+# 22. bake: renders a .mmd source to a markdown file with sentinel + art, source-first.
+src="$TMP/bake.mmd"; printf 'graph TD\n  A --> B\n' > "$src"
+run_sut "$src" -o "$TMP/baked.md"
+assert_exit     "bake exits 0"                 0 "$LAST_RC"
+assert_contains "bake emits sentinel"          "$(cat "$TMP/baked.md")" '<!-- mermaid-to-md:art -->'
+assert_contains "bake source-first (mmd fence)" "$(cat "$TMP/baked.md")" '```mmd'
+assert_contains "bake art has node B"          "$(cat "$TMP/baked.md")" '│ B │'
+assert_not_contains "bake has no details wrapper" "$(cat "$TMP/baked.md")" '<details>'
+
+# 23. bake-then-verify: a freshly baked file verifies clean (B1 resolved).
+run_sut --verify "$TMP/baked.md"
+assert_exit "bake-then-verify exits 0" 0 "$LAST_RC"
+
+# 24. bake-then-inject: re-injecting a baked file is idempotent (no dup art).
+run_sut --inject "$TMP/baked.md"
+assert_eq "bake-then-inject single sentinel"  1 "$(count_lines 'mermaid-to-md:art' "$TMP/baked.md")"
+assert_eq "bake-then-inject single text fence" 1 "$(count_lines '```text' "$TMP/baked.md")"
+
+# =========================================================================
 printf '\n# %d/%d assertions pass (%d fail)\n' "$PASS" "$NT" "$FAIL"
 [[ "$FAIL" -eq 0 ]]

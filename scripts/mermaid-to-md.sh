@@ -166,6 +166,10 @@ fi
 art="$(printf '%s' "$src" | "$BIN" || true)"
 {
   [[ -n "$title" ]] && printf '# %s\n\n' "$title"
-  printf '```text\n%s\n```\n\n' "$art"
-  printf '<details>\n<summary>Mermaid source</summary>\n\n```mmd\n%s\n```\n\n</details>\n' "$src"
+  # Source-first, with the sentinel — the same managed pair inject emits
+  # (decisions/003). A baked file is a valid inject artifact: re-inject is
+  # idempotent, --verify is fresh. No <details>: the source is a complexity
+  # meter, left flat so it surfaces before the art tidies it away.
+  printf '```mmd\n%s\n```\n\n' "$src"
+  printf '<!-- mermaid-to-md:art -->\n```text\n%s\n```\n' "$art"
 } > "${outfile:-/dev/stdout}"

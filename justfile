@@ -27,9 +27,9 @@ build:
 
 # ── Test ──
 
-# ── Test ──
-
-test: build check-docs
+# test runs the inject/verify regression suite, the doc-stale check, and a
+# freshness verify on the demo (a living inject artifact). All green = ship.
+test: build check-docs demo-verify
     @scripts/test-inject.sh
 
 check-docs:
@@ -42,5 +42,13 @@ mermaid FILE BLOCK="":
 
 # ── Demo ──
 
-demo:
+# Re-render the demo's diagrams (inject) and display the result.
+# Idempotent: re-running only changes output if the renderer or source did.
+# `git diff demo/` after this to review drift.
+demo: build
+    scripts/mermaid-to-md.sh --inject demo/mermaid-to-md-demo.md
     @glow demo/mermaid-to-md-demo.md
+
+# Check the demo's baked art is fresh (CI-equivalent; no side effects).
+demo-verify: build
+    scripts/mermaid-to-md.sh --verify demo/mermaid-to-md-demo.md
