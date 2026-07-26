@@ -29,7 +29,7 @@ if [[ "$mode" == "inject" ]]; then
   tmp="$(mktemp)"
   state=TEXT; buf=""; blanks=""
   {
-    while IFS= read -r line; do
+    while IFS= read -r line || [[ -n "$line" ]]; do  # B2: keep a no-newline final line (td-774a89)
       line="${line%$'\r'}"   # tolerate CRLF line endings (td-b8d0d9)
       case "$state" in
         TEXT)
@@ -95,7 +95,7 @@ if [[ "$mode" == "verify" ]]; then
   [[ -f "$file" ]] || { echo "Error: not found: $file" >&2; exit 1; }
   stale=0; line_no=0; mmd_line=0
   state=TEXT; buf=""; expected=""; actual=""
-  while IFS= read -r line; do
+  while IFS= read -r line || [[ -n "$line" ]]; do  # B2: keep a no-newline final line (td-774a89)
     line="${line%$'\r'}"     # tolerate CRLF line endings (td-b8d0d9)
     line_no=$((line_no+1))
     case "$state" in

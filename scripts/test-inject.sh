@@ -241,5 +241,32 @@ assert_eq "bake-then-inject single sentinel"  1 "$(count_lines 'mermaid-to-md:ar
 assert_eq "bake-then-inject single text fence" 1 "$(count_lines '```text' "$TMP/baked.md")"
 
 # =========================================================================
+# No trailing newline (B2, brief 007 / td-774a89): `while IFS= read -r` drops
+# the last line of a file that lacks a final newline. If that line is a
+# closing ``` fence, the mmd/text block never closes — inject emits no art,
+# verify misreports `unclosed-mmd`/`unclosed-text`. Fix: `|| [[ -n "$line" ]]`
+# on both read loops. The JS wrapper is already correct (readLines only slices
+# the phantom '' when content ends with \n).
+# =========================================================================
+
+# 25. inject-no-newline: a mmd block whose closing ``` is the last line with
+# no trailing newline still gets art injected (not silently dropped).
+f="$TMP/nonl.md"
+printf '```mmd\ngraph TD\n  A --> B\n```' > "$f"   # NO trailing newline
+run_sut --inject "$f"
+assert_exit     "inject-no-newline exits 0"          0 "$LAST_RC"
+assert_contains "inject-no-newline inserts sentinel" "$(cat "$f")" '<!-- mermaid-to-md:art -->'
+assert_contains "inject-no-newline art has node B"   "$(cat "$f")" '│ B │'
+assert_eq       "inject-no-newline single sentinel"  1 "$(count_lines 'mermaid-to-md:art' "$f")"
+
+# 26. verify-no-newline: a fresh artifact whose final ``` (text close) has no
+# trailing newline verifies clean (not `unclosed-text`).
+f="$TMP/nonl-v.md"; printf '```mmd\ngraph TD\n  A --> B\n```\n' > "$f"
+run_sut --inject "$f"                  # fresh artifact (ends with \n)
+printf '%s' "$(cat "$f")" > "$f"       # strip trailing newline → last line is ```
+run_sut --verify "$f"
+assert_exit "verify-no-newline exits 0" 0 "$LAST_RC"
+
+# =========================================================================
 printf '\n# %d/%d assertions pass (%d fail)\n' "$PASS" "$NT" "$FAIL"
 [[ "$FAIL" -eq 0 ]]
