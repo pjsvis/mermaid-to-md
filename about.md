@@ -15,7 +15,7 @@ everything and walk you through the rest.
 | `just orient` | Agent orientation — git, tasks, entry points | Agents |
 | `just about` | This page — what the project is | Humans |
 | `just test` | Run the inject/verify regression suite | Both |
-| `just mermaid FILE` | Render ```mermaid blocks from a markdown file | Both |
+| `just mermaid FILE` | Render ```mmd blocks from a markdown file | Both |
 | `cargo build --release` | Build the Rust binary | Developers |
 
 ## What's in the box

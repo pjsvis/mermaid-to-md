@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mermaid-extract — extract ```mermaid blocks from markdown, render via mermaid-tui
+# mermaid-extract — extract ```mmd / ```mermaid blocks from markdown, render via mermaid-tui
 # Usage: mermaid-extract.sh <file> [block-number]
 set -euo pipefail
 BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/target/release/mermaid-tui"
@@ -8,8 +8,9 @@ block_filter="${2:-}"
 [[ ! -f "$file" ]] && { echo "Error: not found: $file" >&2; exit 1; }
 [[ ! -x "$BIN" ]] && { echo "Error: build first: cargo build --release" >&2; exit 1; }
 
-FENCE='```mermaid'
+# Accept the repo convention (```mmd) and legacy/external (```mermaid).
 current=0; in_mermaid=false; buffer=""; capturing_key=false; key=""
+is_fence() { [[ "$1" == '```mmd'* || "$1" == '```mermaid'* ]]; }
 is_list_item() { [[ "$1" =~ ^[0-9]+\.[[:space:]] ]]; }
 is_blank()      { [[ -z "$(printf '%s' "$1" | tr -d '[:space:]')" ]]; }
 emit_diagram() {
@@ -23,7 +24,7 @@ emit_diagram() {
   return 0
 }
 while IFS= read -r line; do
-  if [[ "$line" == "$FENCE"* ]]; then
+  if is_fence "$line"; then
     # flush previous diagram if we were still capturing its key
     if $capturing_key; then emit_diagram "$current" "$buffer" "$key"; fi
     in_mermaid=true; buffer=""; current=$((current + 1)); key=""; capturing_key=false; continue
