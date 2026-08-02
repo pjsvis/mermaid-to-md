@@ -138,3 +138,22 @@ remains), bake's `-o` / stdout semantics, the trailing-newline correctness of
 the bash `while read` loops (that is B2, `briefs/007`, tracked separately as
 `td-774a89`), or Phase 3's release/packaging hygiene. Those are owned
 elsewhere.
+
+---
+
+## Addendum — 2026-07-27: output order superseded by decision 004
+
+The **output order** this record defined (source-first) was flipped to
+**art-first** by `decisions/004-art-first-layout.md` — same session, same
+format-defining weight. Only the byte order within the managed region
+changed: `sentinel → text → mmd`, not `mmd → sentinel → text`.
+
+Everything else in this record stands and is **not** superseded: bake and
+inject share one output shape; `<details>` is retired; verify governs
+both uniformly; the source is a regeneration handle and the art is a
+cache. The complexity-meter argument (rationale #2) is demoted, not
+retracted — the source is still a meter, now a post-read check rather
+than a pre-read warning (see `USAGE.md` — "Two signals, two remedies").
+
+This body is frozen and unedited; 004 carries the amendment. Readers
+arriving here for the current shape should follow the pointer to 004.

@@ -164,18 +164,21 @@ principle as bounded work: when the unit is too big, split it.
 
 The split lesson above is a *spatial* signal: the renderer can't route
 the topology, so labels collide and edges merge. There is a second,
-*structural* signal that the source-first layout exposes — and it has a
+*structural* signal that the source exposes — and it has a
 different remedy.
 
 A baked diagram is two views of the same thing on one scroll: the
-`​```mmd` source (the terse generative form) followed by the `​```text`
-art (the committed spatial claim). The source is a **complexity meter**
-you scan before reading the art. If the source is long, the diagram is
-structurally complex — too many events for one picture. The art can
-*flatter* a complex diagram: a sequence diagram packs messages into a
+`​```text` art (the committed spatial claim) followed by the `​```mmd`
+source (the terse generative form — the checksum). The source is a
+**complexity meter**, but a post-read check, not a pre-read warning. Read
+the art, then glance down: if the source is long, the diagram you just
+saw was structurally complex — too many events for one picture. The art
+can *flatter* a complex diagram: a sequence diagram packs messages into a
 column, so ten source lines collapse to a compact grid, and the layout
-hides the weight the source declares. Reading source-first means the
-meter surfaces before the claim can tidy it away.
+hides the weight the source declares. Reading art-first lets the claim
+land; the source below it corrects the first impression instead of
+warning before it. (See `decisions/004-art-first-layout.md` — the source
+is a checksum, and a checksum comes after the payload.)
 
 The two signals and their remedies:
 
@@ -190,10 +193,13 @@ and low structural complexity — the remedy is shorter labels, not
 splitting. Count edges and states, not characters. Many short lines is
 structurally complex; few long lines is lexically lazy. Different fixes.
 
-This is why the source is left flat, not collapsed behind a `<details>`
-tag. Hiding the source hides the meter — the reader has to *ask* to see
-the complexity rather than having it surface. The flat layout makes the
-source a scannable first-glance check; the wrapper made it opt-in.
+This is why the source is kept flat below the art, not collapsed behind a
+`<details>` tag. Hiding the source hides the meter — the reader has to
+*ask* to see the complexity rather than having it surface. Art-first
+doesn't hide it: flat, visible, just below the payload. The meter works
+as a second glance instead of a first one; what changed is the reading
+order, not the visibility. (Decision 003 rejected `<details>` on this
+basis; 004 keeps the rejection and flips only the order.)
 
 ## Quick reference
 
@@ -219,9 +225,9 @@ glow agent-workflow-discussion.md
 # In Glow, press R to refresh after the file changes
 ```
 
-Bake and inject produce the same shape — a ```mmd source block followed by a
-`<!-- mermaid-to-md:art -->` sentinel and the ```text art. A baked file is a
-valid inject file: re-inject is idempotent, and `--verify` checks both. Verify
-governs any ```mmd block that has — or should have — a following sentinel+art
+Bake and inject produce the same shape — a `<!-- mermaid-to-md:art -->`
+sentinel, the ```text art, then the ```mmd source. A baked file is a valid
+inject file: re-inject is idempotent, and `--verify` checks both. Verify
+governs any ```mmd block that has — or should have — a preceding sentinel+art
 region; ```text blocks with no sentinel are user content, left untouched. (See
-`decisions/003-verify-scope.md`.)
+`decisions/004-art-first-layout.md`.)
