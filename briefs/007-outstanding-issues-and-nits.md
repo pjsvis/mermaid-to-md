@@ -1,7 +1,9 @@
 # brief: mermaid-to-md — outstanding issues and nits
 
 **Created:** 2026-07-25
-**Status:** ready to implement (no td issue yet — create on adoption)
+**Status:** resolved (2026-07-26) — all implementable items completed across three commits; E2/E3 remain genuinely deferred.
+**Resolution:** `04942a7` (B1, B3), `538f9a9` (B2), `541c563` (B4, E1, N1-N3)
+**Debrief:** `debriefs/005-session-2026-07-27.md` (post-resolution investigation — confirmed all items done, retired the brief)
 **Depends on:** the shipped tool (bake/inject/verify wrapper, npm packaging, CI pipeline)
 **Reference:** `debriefs/004` (deferred items), `td-6e3b3a` review (nits), `SYSTEM.md` (version@repo)
 
@@ -183,23 +185,14 @@ not forgotten at release time.
 
 ## Acceptance criteria
 
-- [ ] B1: `--verify` on `demo/mermaid-to-md-demo.md` exits 0 (or the
-      decided semantics are implemented and documented).
-- [ ] B2: a file with no trailing newline is processed correctly (last line
-      not dropped) in both bash and JS wrappers; a test case is added to
-      `scripts/test-inject.sh`.
-- [ ] B3: `ci.yml` smoke test passes on Windows (add `shell: bash` or
-      equivalent).
-- [ ] B4: `release.yml` has `permissions: contents: write`; the release
-      creation step doesn't 403.
-- [ ] E1: version lives in `Cargo.toml` as single source; npm package.json
-      versions are synced at publish time (already done by release.yml);
-      docs reference the version generically.
-- [ ] N1: decide whether platform packages keep the `bin` field; document
-      the choice.
-- [ ] N2: `check-docs` allowlist comment corrected.
-- [ ] N3: release-time doc-update obligation recorded (in this brief or a
-      release checklist).
+- [x] B1: `--verify` on `demo/mermaid-to-md-demo.md` exits 0 — resolved by option (d), unify output shape. `04942a7`, `decisions/003-verify-scope.md`.
+- [x] B2: a file with no trailing newline is processed correctly — bash wrapper fixed (`|| [[ -n "$line" ]]`), JS wrapper verified already-correct. `538f9a9`.
+- [x] B3: `ci.yml` smoke test passes on Windows — `shell: bash` added. `04942a7`.
+- [x] B4: `release.yml` has `permissions: contents: write`. `541c563`.
+- [x] E1: version lives in `Cargo.toml` as single source; README references `<version>` generically; release.yml syncs npm + optionalDependencies from git tag. `541c563`.
+- [x] N1: `bin` field removed from all 5 platform packages — they are binary providers, not standalone CLIs. `541c563`, recorded in `docs/release-checklist.md`.
+- [x] N2: `check-docs` allowlist comment corrected to "when the first npm release is published". `541c563`.
+- [x] N3: release-time doc-update obligation recorded in `docs/release-checklist.md`. `541c563`.
 
 ## The Derrida question
 
@@ -217,3 +210,22 @@ fixes. None of them touch the moat — they're distribution and CI hygiene.
 The brief exists because deferred items without a brief are lost threads
 (elision-and-deferral playbook: a deferred decision not written down dies
 at the boundary). This brief is deferral's bookkeeping.
+
+## Post-resolution addendum (2026-07-27)
+
+All implementable items were resolved on 2026-07-26 across three commits:
+`04942a7` → `538f9a9` → `541c563`. Each commit referenced the brief and
+item codes. The remaining items are genuinely deferred:
+
+- **E2** (`version@repo` reconciliation) — depends on a Protocol-level
+decision (how repo `SYSTEM.md` copies track the canonical source). Not a
+mermaid-to-md concern.
+- **E3** (`install.sh` Windows support) — demand-gated. npm covers
+Windows; a PowerShell `install.ps1` is only warranted if demand
+materialises.
+
+The brief was stale until this session (2026-07-27), when `debriefs/005`
+investigated B1 and found the entire brief already resolved. The stale
+brief is itself a lesson: commit discipline ≠ bookkeeping discipline.
+Commit messages documented the resolution to git; the brief itself was
+never updated. See `debriefs/005-session-2026-07-27.md`.
