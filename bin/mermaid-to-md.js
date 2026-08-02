@@ -82,8 +82,9 @@ function writeOut(content) {
 }
 
 // ── inject mode ─────────────────────────────────────────────────────────
-// Render each ```mmd/```mermaid block, insert/replace the sentinel + ```text
-// art block. Idempotent. Sentinel: <!-- mermaid-to-md:art --> (decisions/002).
+// Art-first managed region (decisions/004): sentinel → ```text art → ```mmd
+// source. The sentinel opens the region; a bare ```mmd is a fresh diagram.
+// Idempotent. Sentinel: <!-- mermaid-to-md:art --> (decisions/002).
 if (mode === 'inject') {
   const file = injectFile;
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
@@ -94,11 +95,15 @@ if (mode === 'inject') {
   let state = 'TEXT';
   let buf = '';
   let blanks = '';
+  let viaSentinel = false;
   for (const line of lines) {
     switch (state) {
       case 'TEXT':
-        if (line.startsWith('```mmd') || line.startsWith('```mermaid')) {
-          out += '```mmd\n'; state = 'IN_MMD'; buf = '';
+        // Sentinel opens the managed region (004); a bare ```mmd is fresh.
+        if (line === '<!-- mermaid-to-md:art -->') {
+          state = 'AT_SENTINEL';
+        } else if (line.startsWith('```mmd') || line.startsWith('```mermaid')) {
+          state = 'IN_MMD'; buf = ''; viaSentinel = false;
         } else if (line.startsWith('```')) {
           out += line + '\n'; state = 'IN_CODE';
         } else {
@@ -109,23 +114,38 @@ if (mode === 'inject') {
         if (line === '```') { out += line + '\n'; state = 'TEXT'; }
         else { out += line + '\n'; }
         break;
-      case 'IN_MMD':
+      case 'AT_SENTINEL':   // sentinel consumed; expect ```text art to skip
+        if (line === '```text') { state = 'SKIP_ART'; }
+        else if (isBlank(line)) { /* tolerate */ }
+        else { out += line + '\n'; state = 'TEXT'; }
+        break;
+      case 'SKIP_ART':      // discard existing art until its closing fence
+        if (line === '```') { state = 'LOOK_FOR_SRC'; }
+        break;
+      case 'LOOK_FOR_SRC':  // old art dropped; expect ```mmd source to re-render
+        if (line.startsWith('```mmd') || line.startsWith('```mermaid')) {
+          state = 'IN_MMD'; buf = ''; viaSentinel = true;
+        } else if (isBlank(line)) { /* consume */ }
+        else if (line.startsWith('```')) { out += line + '\n'; state = 'IN_CODE'; }
+        else { out += line + '\n'; state = 'TEXT'; }
+        break;
+      case 'IN_MMD':        // collect source; on close, emit the art-first region
         if (line === '```') {
-          out += '```\n';
           const art = render(buf);
-          out += '\n<!-- mermaid-to-md:art -->\n```text\n' + art + '\n```\n';
-          state = 'AFTER_MMD'; blanks = '';
+          out += '<!-- mermaid-to-md:art -->\n```text\n' + art + '\n```\n\n```mmd\n' + buf + '```\n';
+          state = viaSentinel ? 'TEXT' : 'AFTER_MMD';
+          if (!viaSentinel) blanks = '';
         } else {
-          out += line + '\n'; buf += line + '\n';
+          buf += line + '\n';
         }
         break;
-      case 'AFTER_MMD':
+      case 'AFTER_MMD':     // bare-mmd region emitted; consume trailing OLD region
         if (line === '<!-- mermaid-to-md:art -->') {
           state = 'SKIP_SENTINEL';
         } else if (isBlank(line)) {
           blanks += line + '\n';
         } else if (line.startsWith('```mmd') || line.startsWith('```mermaid')) {
-          out += blanks + '```mmd\n'; state = 'IN_MMD'; buf = '';
+          out += blanks; state = 'IN_MMD'; buf = ''; viaSentinel = false;
         } else if (line.startsWith('```')) {
           out += blanks + line + '\n'; state = 'IN_CODE';
         } else {
@@ -150,8 +170,9 @@ if (mode === 'inject') {
 }
 
 // ── verify mode ─────────────────────────────────────────────────────────
-// Re-render each ```mmd, diff against the sentinel-marked art. CI-friendly:
-// no side effects. Exit 0 if all fresh, 1 if any stale/missing.
+// Sentinel-anchored freshness check (decisions/004). The sentinel opens the
+// managed region: sentinel → ```text art → ```mmd source. A bare ```mmd with
+// no preceding sentinel is `missing`. CI-friendly: no side effects.
 // stderr: <file>:<line>: <status> (stale | missing | unclosed-mmd | unclosed-text)
 if (mode === 'verify') {
   const file = verifyFile;
@@ -159,48 +180,55 @@ if (mode === 'verify') {
     console.error(`Error: not found: ${file}`); process.exit(1);
   }
   const lines = readLines(file);
-  let stale = 0, lineNo = 0, mmdLine = 0;
-  let state = 'TEXT', buf = '', expected = '', actual = '';
+  let stale = 0, lineNo = 0, sentinelLine = 0;
+  let state = 'TEXT', actual = '', buf = '', expected = '';
   for (const line of lines) {
     lineNo++;
     switch (state) {
       case 'TEXT':
-        if (line.startsWith('```mmd')) { state = 'IN_MMD'; buf = ''; mmdLine = lineNo; }
+        if (line === '<!-- mermaid-to-md:art -->') { state = 'IN_MANAGED'; sentinelLine = lineNo; }
+        else if (line.startsWith('```mmd')) { console.error(`${file}:${lineNo}: missing`); stale = 1; state = 'SKIP_TO_CLOSE'; }
         else if (line.startsWith('```')) { state = 'IN_CODE'; }
         break;
       case 'IN_CODE':
         if (line === '```') state = 'TEXT';
         break;
-      case 'IN_MMD':
-        if (line === '```') { expected = render(buf); state = 'AFTER_MMD'; }
-        else { buf += line + '\n'; }
+      case 'SKIP_TO_CLOSE':  // consume orphan mmd block (already reported missing)
+        if (line === '```') state = 'TEXT';
         break;
-      case 'AFTER_MMD':
-        if (line === '<!-- mermaid-to-md:art -->') { state = 'SKIP_SENTINEL'; }
+      case 'IN_MANAGED':     // after sentinel; expect ```text
+        if (line === '```text') { state = 'IN_ART'; actual = ''; }
         else if (isBlank(line)) { /* skip */ }
-        else if (line.startsWith('```mmd')) { console.error(`${file}:${mmdLine}: missing`); stale = 1; state = 'IN_MMD'; buf = ''; mmdLine = lineNo; }
-        else if (line.startsWith('```')) { console.error(`${file}:${mmdLine}: missing`); stale = 1; state = 'IN_CODE'; }
-        else { console.error(`${file}:${mmdLine}: missing`); stale = 1; state = 'TEXT'; }
+        else if (line === '<!-- mermaid-to-md:art -->') { console.error(`${file}:${sentinelLine}: missing`); stale = 1; sentinelLine = lineNo; }
+        else if (line.startsWith('```mmd')) { console.error(`${file}:${sentinelLine}: missing`); stale = 1; state = 'SKIP_TO_CLOSE'; }
+        else if (line.startsWith('```')) { console.error(`${file}:${sentinelLine}: missing`); stale = 1; state = 'IN_CODE'; }
+        else { console.error(`${file}:${sentinelLine}: missing`); stale = 1; state = 'TEXT'; }
         break;
-      case 'SKIP_SENTINEL':
-        if (line === '```text') { state = 'SKIP_TEXT'; actual = ''; }
+      case 'IN_ART':         // collect actual art until its closing fence
+        if (line === '```') { state = 'IN_MANAGED_SRC'; }
+        else { actual += line + '\n'; }
+        break;
+      case 'IN_MANAGED_SRC': // after art close; expect ```mmd source
+        if (line.startsWith('```mmd')) { state = 'IN_SRC'; buf = ''; }
         else if (isBlank(line)) { /* skip */ }
-        else if (line.startsWith('```mmd')) { console.error(`${file}:${mmdLine}: missing`); stale = 1; state = 'IN_MMD'; buf = ''; mmdLine = lineNo; }
-        else if (line.startsWith('```')) { console.error(`${file}:${mmdLine}: missing`); stale = 1; state = 'IN_CODE'; }
-        else { console.error(`${file}:${mmdLine}: missing`); stale = 1; state = 'TEXT'; }
+        else if (line === '<!-- mermaid-to-md:art -->') { console.error(`${file}:${sentinelLine}: missing`); stale = 1; state = 'IN_MANAGED'; sentinelLine = lineNo; }
+        else if (line.startsWith('```')) { console.error(`${file}:${sentinelLine}: missing`); stale = 1; state = 'IN_CODE'; }
+        else { console.error(`${file}:${sentinelLine}: missing`); stale = 1; state = 'TEXT'; }
         break;
-      case 'SKIP_TEXT':
+      case 'IN_SRC':         // collect source until close; render expected, diff
         if (line === '```') {
+          expected = render(buf);
           if (actual.endsWith('\n')) actual = actual.slice(0, -1);
-          if (actual !== expected) { console.error(`${file}:${mmdLine}: stale`); stale = 1; }
+          if (actual !== expected) { console.error(`${file}:${sentinelLine}: stale`); stale = 1; }
           state = 'TEXT';
-        } else { actual += line + '\n'; }
+        } else { buf += line + '\n'; }
         break;
     }
   }
-  if (state === 'AFTER_MMD' || state === 'SKIP_SENTINEL') { console.error(`${file}:${mmdLine}: missing`); stale = 1; }
-  if (state === 'IN_MMD') { console.error(`${file}:${mmdLine}: unclosed-mmd`); stale = 1; }
-  if (state === 'SKIP_TEXT') { console.error(`${file}:${mmdLine}: unclosed-text`); stale = 1; }
+  if (state === 'IN_MANAGED' || state === 'IN_MANAGED_SRC') { console.error(`${file}:${sentinelLine}: missing`); stale = 1; }
+  if (state === 'IN_ART') { console.error(`${file}:${sentinelLine}: unclosed-text`); stale = 1; }
+  if (state === 'IN_SRC') { console.error(`${file}:${sentinelLine}: unclosed-mmd`); stale = 1; }
+  // SKIP_TO_CLOSE: orphan mmd already reported missing; silent at EOF.
   process.exit(stale ? 1 : 0);
 }
 
@@ -229,8 +257,9 @@ if (src.trim() === '') {
 const art = render(src);
 let output = '';
 if (title) output += '# ' + title + '\n\n';
-// Source-first, with the sentinel — same managed pair as inject (decisions/003).
-// A baked file is a valid inject artifact: re-inject idempotent, --verify fresh.
-output += '```mmd\n' + src + '\n```\n\n<!-- mermaid-to-md:art -->\n```text\n' + art + '\n```\n';
+// Art-first (decisions/004): sentinel → ```text art → ```mmd source. Same
+// managed region as inject, so a baked file is a valid inject artifact —
+// re-inject idempotent, --verify fresh. Source is a post-read checksum.
+output += '<!-- mermaid-to-md:art -->\n```text\n' + art + '\n```\n\n```mmd\n' + src + '\n```\n';
 writeOut(output);
 process.exit(0);

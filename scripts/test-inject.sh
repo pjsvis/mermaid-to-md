@@ -57,6 +57,13 @@ assert_exit()        { local n="$1" exp="$2" rc="$3"
                        else notok "$n" "expected exit $exp; actual: $rc"; fi; }
 # grep -c always prints the count (even 0); || true only normalises exit status.
 count_lines()        { grep -c -- "$1" "$2" 2>/dev/null || true; }
+# first line number containing $1 in $2 (empty if absent) — for order checks
+line_of()            { grep -n -- "$1" "$2" 2>/dev/null | head -1 | cut -d: -f1; }
+# assert_order <name> <file> <needle1> <needle2> <needle3>: line(n1) < line(n2) < line(n3)
+assert_order()       { local n="$1" file="$2" a b c
+                       a="$(line_of "$3" "$file")"; b="$(line_of "$4" "$file")"; c="$(line_of "$5" "$file")"
+                       if [[ -n "$a" && -n "$b" && -n "$c" && "$a" -lt "$b" && "$b" -lt "$c" ]]; then ok "$n"
+                       else notok "$n" "expected $3<$4<$5 by line; got <$a><$b><$c>"; fi; }
 
 # ── fixtures ─────────────────────────────────────────────────────────────
 # A single-edge graph; its rendered art contains "│ A │" and "│ B │".
@@ -157,9 +164,9 @@ run_sut --inject "$f"
 run_sut --verify "$f"
 assert_exit "verify-fresh exits 0" 0 "$LAST_RC"
 
-# 14. verify-stale: mmd source changed but art not regenerated → exit 1 + stale.
+# 14. verify-stale: an art-first region whose art doesn't match its source → exit 1 + stale.
 f="$TMP/vstale.md"
-printf '```mmd\ngraph TD\n  A --> B --> C\n```\n<!-- mermaid-to-md:art -->\n```text\nOLD ART\n```\n' > "$f"
+printf '<!-- mermaid-to-md:art -->\n```text\nOLD ART\n```\n\n```mmd\ngraph TD\n  A --> B --> C\n```\n' > "$f"
 run_sut --verify "$f"
 assert_exit "verify-stale exits 1" 1 "$LAST_RC"
 assert_contains "verify-stale reports stale" "$LAST_ERR" 'stale'
@@ -222,14 +229,15 @@ assert_not_contains "verify-crlf not unclosed-mmd"    "$LAST_ERR" 'unclosed'
 # following region, so --verify reported `missing` at every baked diagram.
 # =========================================================================
 
-# 22. bake: renders a .mmd source to a markdown file with sentinel + art, source-first.
+# 22. bake: renders a .mmd source to art-first markdown — sentinel → ```text art → ```mmd source.
 src="$TMP/bake.mmd"; printf 'graph TD\n  A --> B\n' > "$src"
 run_sut "$src" -o "$TMP/baked.md"
 assert_exit     "bake exits 0"                 0 "$LAST_RC"
 assert_contains "bake emits sentinel"          "$(cat "$TMP/baked.md")" '<!-- mermaid-to-md:art -->'
-assert_contains "bake source-first (mmd fence)" "$(cat "$TMP/baked.md")" '```mmd'
+assert_contains "bake art-first (mmd fence)"   "$(cat "$TMP/baked.md")" '```mmd'
 assert_contains "bake art has node B"          "$(cat "$TMP/baked.md")" '│ B │'
 assert_not_contains "bake has no details wrapper" "$(cat "$TMP/baked.md")" '<details>'
+assert_order "bake art-first order (sentinel<text<mmd)" "$TMP/baked.md" 'mermaid-to-md:art' '```text' '```mmd'
 
 # 23. bake-then-verify: a freshly baked file verifies clean (B1 resolved).
 run_sut --verify "$TMP/baked.md"
@@ -259,13 +267,50 @@ assert_contains "inject-no-newline inserts sentinel" "$(cat "$f")" '<!-- mermaid
 assert_contains "inject-no-newline art has node B"   "$(cat "$f")" '│ B │'
 assert_eq       "inject-no-newline single sentinel"  1 "$(count_lines 'mermaid-to-md:art' "$f")"
 
-# 26. verify-no-newline: a fresh artifact whose final ``` (text close) has no
-# trailing newline verifies clean (not `unclosed-text`).
+# 26. verify-no-newline: a fresh art-first artifact whose final ``` (mmd close)
+# has no trailing newline verifies clean (not `unclosed-mmd`).
 f="$TMP/nonl-v.md"; printf '```mmd\ngraph TD\n  A --> B\n```\n' > "$f"
 run_sut --inject "$f"                  # fresh artifact (ends with \n)
 printf '%s' "$(cat "$f")" > "$f"       # strip trailing newline → last line is ```
 run_sut --verify "$f"
 assert_exit "verify-no-newline exits 0" 0 "$LAST_RC"
+
+# =========================================================================
+# Art-first managed region (decisions/004): sentinel → ```text art → ```mmd
+# source. The diagram is the product; the source is the checksum. These pin
+# the new byte order, idempotency on an already-art-first file, and clean
+# conversion of a legacy source-first file on first --inject.
+# =========================================================================
+
+# 27. inject art-first order: a fresh mmd injects as sentinel → text → mmd.
+f="$TMP/af-order.md"; printf '%s\n' "$MMD_SIMPLE" > "$f"
+run_sut --inject "$f"
+assert_order "inject-fresh art-first order (sentinel<text<mmd)" "$f" 'mermaid-to-md:art' '```text' '```mmd'
+
+# 28. idempotent on art-first: re-injecting an already-art-first file keeps
+#     art-first order and a single region (no duplication, no reversion).
+f="$TMP/af-idem.md"; printf '%s\n' "$MMD_SIMPLE" > "$f"
+run_sut --inject "$f"              # now art-first
+run_sut --inject "$f"              # re-inject the art-first file
+run_sut --inject "$f"              # and again
+assert_eq    "art-first-idem single sentinel"   1 "$(count_lines 'mermaid-to-md:art' "$f")"
+assert_eq    "art-first-idem single text fence" 1 "$(count_lines '```text' "$f")"
+assert_eq    "art-first-idem single mmd fence"  1 "$(count_lines '```mmd' "$f")"
+assert_order "art-first-idem order preserved (sentinel<text<mmd)" "$f" 'mermaid-to-md:art' '```text' '```mmd'
+run_sut --verify "$f"
+assert_exit "art-first-idem verifies clean" 0 "$LAST_RC"
+
+# 29. old-format conversion: a legacy source-first file (mmd → sentinel → text)
+#     converts to art-first on first --inject — one region, stale art dropped.
+f="$TMP/af-conv.md"
+printf '```mmd\ngraph TD\n  A --> B\n```\n\n<!-- mermaid-to-md:art -->\n```text\nSTALE ART\n```\n' > "$f"
+run_sut --inject "$f"
+assert_eq    "old-format-convert single sentinel"  1 "$(count_lines 'mermaid-to-md:art' "$f")"
+assert_eq    "old-format-convert single mmd fence"  1 "$(count_lines '```mmd' "$f")"
+assert_not_contains "old-format-convert drops stale art" "$(cat "$f")" 'STALE ART'
+assert_order "old-format-convert art-first order (sentinel<text<mmd)" "$f" 'mermaid-to-md:art' '```text' '```mmd'
+run_sut --verify "$f"
+assert_exit "old-format-convert verifies clean" 0 "$LAST_RC"
 
 # =========================================================================
 printf '\n# %d/%d assertions pass (%d fail)\n' "$PASS" "$NT" "$FAIL"
