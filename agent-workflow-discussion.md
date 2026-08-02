@@ -10,22 +10,6 @@ state diagram — then surfaces what the diagram reveals.
 
 ## The diagram
 
-```mmd
-stateDiagram-v2
-    [*] --> Unstarted
-    Unstarted --> Oriented: td usage --new-session
-    Oriented --> Working: td usage -q, pick task
-    Working --> Blocked: need human input
-    Blocked --> Working: human responds
-    Blocked --> Stuck: no response in N
-    Working --> Handoff: phase boundary, td handoff
-    Handoff --> Compacted: /new
-    Compacted --> Oriented: td context resume
-    Working --> Done: task complete, debrief
-    Done --> [*]
-    Stuck --> [*]: abandon
-```
-
 <!-- mermaid-to-md:art -->
 ```text
                  ╭───╮
@@ -61,6 +45,22 @@ stateDiagram-v2
                     ╭───╮                                  │
                     │ ● │◄─────────────────────────────────┘
                     ╰───╯
+```
+
+```mmd
+stateDiagram-v2
+    [*] --> Unstarted
+    Unstarted --> Oriented: td usage --new-session
+    Oriented --> Working: td usage -q, pick task
+    Working --> Blocked: need human input
+    Blocked --> Working: human responds
+    Blocked --> Stuck: no response in N
+    Working --> Handoff: phase boundary, td handoff
+    Handoff --> Compacted: /new
+    Compacted --> Oriented: td context resume
+    Working --> Done: task complete, debrief
+    Done --> [*]
+    Stuck --> [*]: abandon
 ```
 
 ## What the diagram is
@@ -157,17 +157,6 @@ and it was right.
 
 ### Diagram 2a: Epic creation (linear, no cycles)
 
-```mmd
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> EpicRequested: human asks
-    EpicRequested --> EpicCreated: td epic create
-    EpicCreated --> PhaseLoop: pick phase 1
-    PhaseLoop --> EpicDone: all phases done
-    EpicDone --> [*]: debrief
-    Idle --> [*]: no work
-```
-
 <!-- mermaid-to-md:art -->
 ```text
        ╭───╮
@@ -205,6 +194,17 @@ stateDiagram-v2
        ╰───╯
 ```
 
+```mmd
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> EpicRequested: human asks
+    EpicRequested --> EpicCreated: td epic create
+    EpicCreated --> PhaseLoop: pick phase 1
+    PhaseLoop --> EpicDone: all phases done
+    EpicDone --> [*]: debrief
+    Idle --> [*]: no work
+```
+
 This is the outer machine. `PhaseLoop` is a placeholder for the inner cycle
 — the box the next diagram opens. The key observation: **`EpicRequested` is
 a human-driven transition.** The agent does not create epics on its own; the
@@ -213,17 +213,6 @@ visible by putting a whole state between `Idle` and `EpicCreated`. If the
 agent could self-epic, that state would collapse. It shouldn't.
 
 ### Diagram 2b: The phase loop (the newup cycle)
-
-```mmd
-stateDiagram-v2
-    [*] --> Working
-    Working --> Handoff: phase done
-    Handoff --> Compacted: /new
-    Compacted --> Working: td context
-    Working --> Blocked: blocked
-    Blocked --> Working: unblocked
-    Working --> [*]: all phases done
-```
 
 <!-- mermaid-to-md:art -->
 ```text
@@ -245,6 +234,17 @@ stateDiagram-v2
  ╭───────────╮                                    │
  │ Compacted ├────────────────────────────────────┘
  ╰───────────╯
+```
+
+```mmd
+stateDiagram-v2
+    [*] --> Working
+    Working --> Handoff: phase done
+    Handoff --> Compacted: /new
+    Compacted --> Working: td context
+    Working --> Blocked: blocked
+    Blocked --> Working: unblocked
+    Working --> [*]: all phases done
 ```
 
 This is the inner machine — the same `Working → Handoff → Compacted →

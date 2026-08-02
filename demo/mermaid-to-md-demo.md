@@ -19,16 +19,6 @@ inject and displays the result. Check freshness with
 
 ## 1. The pipeline (flowchart)
 
-```mmd
-graph TD
-  A[Source .mmd] --> B[mermaid-tui]
-  B --> C[Unicode art]
-  C --> D[Wrap in fence]
-  D --> E[.md file]
-  E --> F[Glow]
-  F --> G[Reads correctly]
-```
-
 <!-- mermaid-to-md:art -->
 ```text
    ┌─────────────┐
@@ -66,19 +56,19 @@ graph TD
  └─────────────────┘
 ```
 
+```mmd
+graph TD
+  A[Source .mmd] --> B[mermaid-tui]
+  B --> C[Unicode art]
+  C --> D[Wrap in fence]
+  D --> E[.md file]
+  E --> F[Glow]
+  F --> G[Reads correctly]
+```
+
 ---
 
 ## 2. Brief lifecycle (state diagram)
-
-```mmd
-stateDiagram-v2
-  [*] --> Draft
-  Draft --> Pending : submit
-  Pending --> InProgress : approve
-  InProgress --> Complete : finish
-  Complete --> [*]
-  Pending --> Draft : reject
-```
 
 <!-- mermaid-to-md:art -->
 ```text
@@ -112,21 +102,19 @@ stateDiagram-v2
      ╰───╯
 ```
 
+```mmd
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Pending : submit
+  Pending --> InProgress : approve
+  InProgress --> Complete : finish
+  Complete --> [*]
+  Pending --> Draft : reject
+```
+
 ---
 
 ## 3. The round-trip (sequence diagram)
-
-```mmd
-sequenceDiagram
-  participant User
-  participant CLI
-  participant Binary
-  User->>CLI: mermaid-to-md input.mmd
-  CLI->>Binary: pipe source
-  Binary-->>CLI: unicode art
-  CLI->>CLI: wrap in fence
-  CLI-->>User: output.md
-```
 
 <!-- mermaid-to-md:art -->
 ```text
@@ -153,6 +141,18 @@ sequenceDiagram
 ┌───┴──┐                  ┌──┴──┐           ┌────┴───┐
 │ User │                  │ CLI │           │ Binary │
 └──────┘                  └─────┘           └────────┘
+```
+
+```mmd
+sequenceDiagram
+  participant User
+  participant CLI
+  participant Binary
+  User->>CLI: mermaid-to-md input.mmd
+  CLI->>Binary: pipe source
+  Binary-->>CLI: unicode art
+  CLI->>CLI: wrap in fence
+  CLI-->>User: output.md
 ```
 
 ---

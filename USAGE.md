@@ -48,19 +48,6 @@ plugin. The diagram and the prose about the diagram stay on the same scroll.
 
 ## The cycle
 
-```mmd
-stateDiagram-v2
-    [*] --> Draw
-    Draw --> View: bake, open Glow
-    View --> Discuss: read diagram
-    Discuss --> Redraw: gap found
-    Discuss --> Done: it shows what is going on
-    Redraw --> Bake: update mmd source
-    Bake --> View: re-render, press R
-    Draw --> Done: first attempt suffices
-    Done --> [*]
-```
-
 <!-- mermaid-to-md:art -->
 ```text
             ╭───╮
@@ -91,6 +78,19 @@ stateDiagram-v2
  ╭──────╮      ╭───╮                          │
  │ Bake ├──────│ ● │──────────────────────────┘
  ╰──────╯      ╰───╯
+```
+
+```mmd
+stateDiagram-v2
+    [*] --> Draw
+    Draw --> View: bake, open Glow
+    View --> Discuss: read diagram
+    Discuss --> Redraw: gap found
+    Discuss --> Done: it shows what is going on
+    Redraw --> Bake: update mmd source
+    Bake --> View: re-render, press R
+    Draw --> Done: first attempt suffices
+    Done --> [*]
 ```
 
 1. **Draw.** Write Mermaid source for the system you're reasoning about.
