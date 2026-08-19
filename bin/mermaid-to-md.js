@@ -58,17 +58,45 @@ function render(src) {
 }
 
 // ── arg parsing ─────────────────────────────────────────────────────────
+// ── help text (parity: scripts/mermaid-to-md.sh) ──────────────────────
+const HELP = `mermaid-to-md — render Mermaid diagrams to markdown with baked Unicode art
+
+Usage:
+  mermaid-to-md [<file.mmd>|-] [--title T] [-o <out.md>]   bake: source → standalone .md
+  mermaid-to-md --inject <file.md> [-o <out.md>]           inject: render ` + '```' + `mmd blocks in place
+  mermaid-to-md --verify <file.md>                         verify: re-render + diff (CI; exit 1 if stale/missing)
+
+Options:
+  --title T       heading for baked output (default: derived from filename)
+  -o, --output    write to <out.md> instead of stdout (bake) / the file (inject)
+  -               read source from stdin (bake)
+  -h, --help      print this help and exit
+  -V, --version   print the engine version and exit (wrapper ships lockstep with it)
+
+Managed region (art-first, decisions/004): sentinel → ` + '```' + `text art → ` + '```' + `mmd source.
+Verify reports file:line as stale | missing | unclosed-mmd | unclosed-text.
+The raw renderer is mermaid-tui (see mermaid-tui --help).`;
+
 let mode = 'bake', injectFile = '', verifyFile = '', title = '', outfile = '', infile = '';
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === '--inject')      { mode = 'inject'; injectFile = args[++i]; if (!injectFile) { console.error('--inject needs a file'); process.exit(2); } }
   else if (a === '--verify') { mode = 'verify'; verifyFile = args[++i]; if (!verifyFile) { console.error('--verify needs a file'); process.exit(2); } }
+  else if (a === '-h' || a === '--help')    { mode = 'help'; }
+  else if (a === '-V' || a === '--version') { mode = 'version'; }
   else if (a === '--title')  { title = args[++i]; if (title === undefined) { console.error('--title needs a value'); process.exit(2); } }
   else if (a === '-o' || a === '--output') { outfile = args[++i]; if (!outfile) { console.error('-o needs a value'); process.exit(2); } }
   else if (a === '-')         { infile = '-'; }
-  else if (a.startsWith('-')) { console.error('Usage: mermaid-to-md [<file.mmd>|-] [--title T] [-o out] | --inject <file.md> [-o out] | --verify <file.md>'); process.exit(2); }
+  else if (a.startsWith('-')) { console.error('Usage: mermaid-to-md [<file.mmd>|-] [--title T] [-o out] | --inject <file.md> [-o out] | --verify <file.md>  (-h for help)'); process.exit(2); }
   else                        { infile = a; }
+}
+
+// help/version: surface, not modes (binary already resolved above)
+if (mode === 'help') { console.log(HELP); process.exit(0); }
+if (mode === 'version') {
+  process.stdout.write(execFileSync(binaryPath, ['--version'], { encoding: 'utf8' }));
+  process.exit(0);
 }
 
 // ── helpers ─────────────────────────────────────────────────────────────

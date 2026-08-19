@@ -11,15 +11,42 @@ while (( $# )); do
   case "$1" in
     --inject)     mode="inject"; inject_file="${2:?--inject needs a file}"; shift 2;;
     --verify)     mode="verify"; verify_file="${2:?--verify needs a file}"; shift 2;;
+    -h|--help)    mode="help";    shift;;
+    -V|--version) mode="version"; shift;;
     --title)      title="${2:?--title needs a value}";   shift 2;;
     -o|--output)  outfile="${2:?-o needs a value}";       shift 2;;
     -)            infile="-";                              shift;;
-    -*)           echo "Usage: $0 [<file.mmd>|-] [--title T] [-o out] | --inject <file.md> [-o out] | --verify <file.md>" >&2; exit 2;;
+    -*)           echo "Usage: $0 [<file.mmd>|-] [--title T] [-o out] | --inject <file.md> [-o out] | --verify <file.md>  (-h for help)" >&2; exit 2;;
     *)            infile="$1";                             shift;;
   esac
 done
 [[ ! -x "$BIN" ]] && BIN="$(command -v mermaid-tui || true)"   # PATH fallback (installed via install.sh)
 [[ -n "$BIN" && -x "$BIN" ]] || { echo "Error: mermaid-tui not found — build it (cargo build --release) or install it (install.sh / npm)" >&2; exit 1; }
+
+# --- help / version: surface, not modes ---
+if [[ "$mode" == "help" ]]; then
+  cat <<'HELP'
+mermaid-to-md — render Mermaid diagrams to markdown with baked Unicode art
+
+Usage:
+  mermaid-to-md [<file.mmd>|-] [--title T] [-o <out.md>]   bake: source → standalone .md
+  mermaid-to-md --inject <file.md> [-o <out.md>]           inject: render ```mmd blocks in place
+  mermaid-to-md --verify <file.md>                         verify: re-render + diff (CI; exit 1 if stale/missing)
+
+Options:
+  --title T       heading for baked output (default: derived from filename)
+  -o, --output    write to <out.md> instead of stdout (bake) / the file (inject)
+  -               read source from stdin (bake)
+  -h, --help      print this help and exit
+  -V, --version   print the engine version and exit (wrapper ships lockstep with it)
+
+Managed region (art-first, decisions/004): sentinel → ```text art → ```mmd source.
+Verify reports file:line as stale | missing | unclosed-mmd | unclosed-text.
+The raw renderer is mermaid-tui (see mermaid-tui --help).
+HELP
+  exit 0
+fi
+if [[ "$mode" == "version" ]]; then exec "$BIN" --version; fi
 
 # --- inject mode: render each ```mmd/```mermaid block, insert/replace art ---
 # Art-first managed region (decisions/004): sentinel → ```text art → ```mmd
