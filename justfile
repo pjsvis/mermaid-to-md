@@ -42,6 +42,13 @@ mermaid FILE BLOCK="":
 
 # ── Demo ──
 
+# Deploy binary + wrapper to ~/.local/bin for global (dogfood) use.
+# The wrapper symlink resolves the binary via PATH when off the build tree.
+install-local: build
+	cp target/release/mermaid-tui ~/.local/bin/mermaid-tui
+	ln -sf "$(cd "$(dirname scripts/mermaid-to-md.sh)" && pwd)/mermaid-to-md.sh" ~/.local/bin/mermaid-to-md
+	@echo "installed: ~/.local/bin/mermaid-tui + ~/.local/bin/mermaid-to-md (→ repo wrapper)"
+
 # Re-render the demo's diagrams (inject) and display the result.
 # Idempotent: re-running only changes output if the renderer or source did.
 # `git diff demo/` after this to review drift.

@@ -31,9 +31,18 @@ try {
   const exe = process.platform === 'win32' ? 'mermaid-tui.exe' : 'mermaid-tui';
   binaryPath = path.join(path.dirname(pkgPath), 'bin', exe);
 } catch {
-  console.error(`Platform package not installed: ${pkgName}`);
-  console.error(`Install it with: npm install -g ${pkgName}`);
-  process.exit(1);
+  // No npm platform package — fall back to a mermaid-tui on PATH
+  // (mirrors the bash wrapper's PATH fallback: install.sh / cargo build).
+  binaryPath = 'mermaid-tui';
+  try {
+    execFileSync(binaryPath, { input: '', stdio: ['pipe', 'ignore', 'ignore'] }); // probe: resolvable?
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      console.error(`Platform package not installed: ${pkgName} (and no mermaid-tui on PATH)`);
+      console.error(`Install with: npm install -g ${pkgName} — or install.sh, or cargo build --release`);
+      process.exit(1);
+    }
+  }
 }
 
 // ── render helper: mermaid source (string) → art (string) ───────────────

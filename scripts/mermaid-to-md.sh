@@ -18,7 +18,8 @@ while (( $# )); do
     *)            infile="$1";                             shift;;
   esac
 done
-[[ ! -x "$BIN" ]] && { echo "Error: build first: cargo build --release" >&2; exit 1; }
+[[ ! -x "$BIN" ]] && BIN="$(command -v mermaid-tui || true)"   # PATH fallback (installed via install.sh)
+[[ -n "$BIN" && -x "$BIN" ]] || { echo "Error: mermaid-tui not found — build it (cargo build --release) or install it (install.sh / npm)" >&2; exit 1; }
 
 # --- inject mode: render each ```mmd/```mermaid block, insert/replace art ---
 # Art-first managed region (decisions/004): sentinel → ```text art → ```mmd
