@@ -36,8 +36,9 @@ npx mermaid-to-md < diagram.mmd > out.md
 curl -fsSL https://raw.githubusercontent.com/pjsvis/mermaid-to-md/main/install.sh | sh
 ```
 
-Downloads the precompiled binary for your platform to `~/.local/bin`. No
-Node, no Rust toolchain — just the binary. (Use `--prefix /usr/local` or
+Downloads the precompiled binary and the `mermaid-to-md` wrapper for your
+platform to `~/.local/bin`. No Node, no Rust toolchain — the full CLI
+(engine + bake/inject/verify) with nothing else. (Use `--prefix /usr/local` or
 `--version <version>` to customise; defaults to the latest release.)
 
 ### Render to a markdown file

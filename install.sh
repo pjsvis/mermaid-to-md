@@ -1,18 +1,24 @@
 #!/usr/bin/env sh
 # install.sh — curl|sh escape hatch for non-npm users.
-# Downloads the correct precompiled mermaid-tui binary from GitHub Releases
-# and installs it to ~/.local/bin (or a prefix you choose).
+# Downloads the precompiled mermaid-tui binary AND the mermaid-to-md
+# wrapper (bake/inject/verify) from GitHub Releases, and installs both
+# to ~/.local/bin (or a prefix you choose). The wrapper resolves the
+# binary via PATH, so the pair works standalone — no build tree needed.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pjsvis/mermaid-to-md/main/install.sh | sh
 #   curl -fsSL .../install.sh | sh -s -- --prefix /usr/local
 #   curl -fsSL .../install.sh | sh -s -- --version 0.1.0
+#
+# Testing: MERMAID_TO_MD_BASE_URL overrides the release base
+# (default https://github.com/pjsvis/mermaid-to-md/releases) so the
+# download path can be exercised against a local server.
 set -eu
 
 REPO="pjsvis/mermaid-to-md"
 VERSION="${MERMAID_TO_MD_VERSION:-latest}"
 PREFIX="${PREFIX:-$HOME/.local/bin}"
-PREFIX_ARG=""
+BASE_URL="${MERMAID_TO_MD_BASE_URL:-https://github.com/${REPO}/releases}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -41,40 +47,49 @@ esac
 PLATFORM="${PLATFORM_OS}-${PLATFORM_ARCH}"
 BIN_NAME="mermaid-tui"
 
-echo "Installing mermaid-tui for ${PLATFORM} (version: ${VERSION})"
+echo "Installing mermaid-tui + mermaid-to-md wrapper for ${PLATFORM} (version: ${VERSION})"
 
-# ── resolve download URL ─────────────────────────────────────────────────
+# ── resolve download URLs ─────────────────────────────────────────────────
 if [ "$VERSION" = "latest" ]; then
-  URL="https://github.com/${REPO}/releases/latest/download/${BIN_NAME}"
+  ASSET_URL="${BASE_URL}/latest/download"
 else
-  URL="https://github.com/${REPO}/releases/download/v${VERSION}/${BIN_NAME}"
+  ASSET_URL="${BASE_URL}/download/v${VERSION}"
 fi
 
-# ── download ─────────────────────────────────────────────────────────────
+# ── download ──────────────────────────────────────────────────────────────
+fetch() {  # fetch <asset-name> <dest>
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "${ASSET_URL}/$1" -o "$2"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO "$2" "${ASSET_URL}/$1"
+  else
+    echo "Error: neither curl nor wget found" >&2; exit 1
+  fi
+}
+
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
-TARGET="${TMPDIR}/${BIN_NAME}"
 
-echo "Downloading ${URL}"
-if command -v curl >/dev/null 2>&1; then
-  curl -fsSL "$URL" -o "$TARGET"
-elif command -v wget >/dev/null 2>&1; then
-  wget -qO "$TARGET" "$URL"
-else
-  echo "Error: neither curl nor wget found" >&2; exit 1
-fi
+echo "Downloading ${ASSET_URL}/${BIN_NAME}"
+fetch "$BIN_NAME" "${TMPDIR}/${BIN_NAME}"
 
-chmod +x "$TARGET"
+echo "Downloading ${ASSET_URL}/mermaid-to-md.sh"
+fetch "mermaid-to-md.sh" "${TMPDIR}/mermaid-to-md"
+
+chmod +x "${TMPDIR}/${BIN_NAME}" "${TMPDIR}/mermaid-to-md"
 
 # ── install ──────────────────────────────────────────────────────────────
 mkdir -p "$PREFIX"
-mv "$TARGET" "${PREFIX}/${BIN_NAME}"
+mv "$TMPDIR/$BIN_NAME" "${PREFIX}/${BIN_NAME}"
+mv "$TMPDIR/mermaid-to-md" "${PREFIX}/mermaid-to-md"
 
 echo ""
-echo "Installed mermaid-tui to ${PREFIX}/${BIN_NAME}"
+echo "Installed to ${PREFIX}:"
+echo "  mermaid-tui    — render Mermaid (stdin) to Unicode art"
+echo "  mermaid-to-md  — bake / inject / verify wrapper"
 echo ""
 if ! echo "$PATH" | grep -q "$PREFIX"; then
   echo "NOTE: ${PREFIX} is not in your PATH. Add it:"
   echo "  export PATH=\"${PREFIX}:\$PATH\""
 fi
-echo "Verify: mermaid-tui --help"
+echo "Verify: mermaid-tui --version"

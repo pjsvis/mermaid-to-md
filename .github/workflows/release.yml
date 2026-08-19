@@ -105,6 +105,14 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Upload wrapper to release
+        # Platform-independent: ship the mermaid-to-md wrapper (bake/inject/
+        # verify) as a release asset too, so install.sh can install the full
+        # CLI, not just the engine binary. One upload — this job runs once.
+        uses: softprops/action-gh-release@v2
+        with:
+          files: scripts/mermaid-to-md.sh
+
       - name: Publish main package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
