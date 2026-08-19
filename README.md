@@ -62,7 +62,7 @@ glow demo/mermaid-to-md-demo.md
 ## Modes
 
 The binary (`mermaid-tui`) renders Mermaid source from stdin to Unicode art
-on stdout. The three modes below are the wrapper layer
+on stdout — `--width N` sets the canvas width, `--help` shows the surface. The three modes below are the wrapper layer
 (`scripts/mermaid-to-md.sh`) — shipped (bake, inject, verify; `just test`
 runs the regression suite). npm packaging is pending (`td-6e3b3a`).
 
