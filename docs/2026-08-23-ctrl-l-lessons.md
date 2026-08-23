@@ -83,6 +83,56 @@ sequenceDiagram
     Note over T: scrollback erased too
 ```
 
+## Addendum: the cheeky boundary-condition question (2026-08-23, same day)
+
+> Given the two buffers, one could assume a boundary condition of an empty
+> screen — use both buffers and still return to the empty screen.
+
+Verdict: **sound as a protocol invariant, unsound as a state machine.**
+
+- The empty screen isn't an *assumed* boundary — it's a **manufactured** one.
+  `smcup` (`ESC[?1049h`, verified: terminfo for xterm-256color) clears the alt
+  screen on entry, so every full-screen app mints a fresh empty page on
+  demand. That is form feed reborn, software edition.
+- The round trip preserves the normal buffer *verbatim* — empty or not, empty
+  is just the degenerate case. `fzf` proves this contract daily: it draws on
+  the alt screen, you pick, your screen (even a blank one) returns untouched.
+- Two catches. (1) "Empty screen" is a photograph of zero, not a restore
+  point: cwd, shell vars, OSC title, and history all moved on — the view
+  restores, the state does not (lesson 3 recurses). (2) The invariant depends
+  on universal contract compliance: any program that doesn't use the alt
+  screen (`ls`, `cat`, `cargo build`) scrolls the normal buffer. And two
+  buffers is one bit, not a stack — nesting fails; tmux/screen exist to
+  rebuild the page-stream that paper had.
+
+Cheeky answer: yes, you can always return to the empty *screen* — you just
+
+can't return to the empty *terminal*.
+
+<!-- mermaid-to-md:art -->
+```text
+╭ mermaid: stateDiagram-v2 ────────────────────╮
+│ stateDiagram-v2                              │
+│     [*] --> Empty                            │
+│     Empty --> Alt : smcup (mints fresh page) │
+│     Alt --> Alt : app draws freely           │
+│     Alt --> Empty : rmcup (view restored)    │
+│     Empty --> Scrolled : ls, cat, build      │
+│     Scrolled --> Empty : Ctrl+L              │
+╰──────────────────────────────────────────────╯
+This diagram is too wide to display here — open the image to view it in full.
+```
+
+```mmd
+stateDiagram-v2
+    [*] --> Empty
+    Empty --> Alt : smcup (mints fresh page)
+    Alt --> Alt : app draws freely
+    Alt --> Empty : rmcup (view restored)
+    Empty --> Scrolled : ls, cat, build
+    Scrolled --> Empty : Ctrl+L
+```
+
 ## The first three things to tell anyone about the terminal
 
 1. **Ctrl+L clears the screen.** Pure win: no arguments, no risk, instant feedback — and it quietly teaches lesson 3 above (nothing was deleted; the machine remembers everything).
