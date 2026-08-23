@@ -111,25 +111,30 @@ can't return to the empty *terminal*.
 
 <!-- mermaid-to-md:art -->
 ```text
-╭ mermaid: stateDiagram-v2 ────────────────────╮
-│ stateDiagram-v2                              │
-│     [*] --> Empty                            │
-│     Empty --> Alt : smcup (mints fresh page) │
-│     Alt --> Alt : app draws freely           │
-│     Alt --> Empty : rmcup (view restored)    │
-│     Empty --> Scrolled : ls, cat, build      │
-│     Scrolled --> Empty : Ctrl+L              │
-╰──────────────────────────────────────────────╯
-This diagram is too wide to display here — open the image to view it in full.
+                              ╭───╮
+                              │ ● │
+                              ╰─┬─╯
+                                │
+                                ▼
+                            ╭───────╮                Crmcup
+                            │ Empty │◄──────────────────────┐
+                            ╰───┬───╯                       │
+                   ┌────────────┴─────────────┐             │
+                   ▼smcup                     │             │
+                ╭─────╮                       ▼ls, cat      │
+                │ Alt ├─────────────────╭──────────╮────────┤
+                ╰───┬─╯                 │ Scrolled ├────────┘
+                    │▲  draws freely    ╰──────────╯
+                    ╰╯
 ```
 
 ```mmd
 stateDiagram-v2
     [*] --> Empty
-    Empty --> Alt : smcup (mints fresh page)
-    Alt --> Alt : app draws freely
-    Alt --> Empty : rmcup (view restored)
-    Empty --> Scrolled : ls, cat, build
+    Empty --> Alt : smcup
+    Alt --> Alt : draws freely
+    Alt --> Empty : rmcup
+    Empty --> Scrolled : ls, cat
     Scrolled --> Empty : Ctrl+L
 ```
 
