@@ -162,6 +162,32 @@ chainable *because* it gave up state; residents have state *because* they
 gave up composability. Same door, fourth road: the screen was never the
 state.
 
+## Addendum 3: why it's nae a liability (the two laws)
+
+> "This terminal thing can browse files and view markdown and return to
+> browsing and keep doing that without becoming a f*cking liability."
+
+It can, and the reasons generalise:
+
+1. **Every byte of state has an owner, and the owner can be killed.** State
+   lives in processes; process death is garbage collection. No unowned
+   mutable state → no leaks across the composition boundary.
+2. **The composition boundary hasn't moved in forty years.** Pipes (1973),
+   exit codes, VT escapes. glow renders what vi wrote decades ago.
+   Composition across a stable boundary is cheap; churn is what costs ten
+   frameworks.
+
+The fair steelman: the browser DOM is a shared mutable global tree in an
+adversarially-updated sandbox that is OS + runtime + distribution channel at
+once — the frameworks are the tax on that. The terminal never paid the tax
+because it never accepted the premise: no shared UI heap at all. Each app
+gets its own copy of the screen, talks in bytes, dies politely — Hoare's
+Communicating Sequential Processes (1978) on a teletype abstraction. The
+restricted grammar is the feature: a monospace grid is a protocol, and
+protocols are why things compose.
+
+Small state, owned state, frozen boundary. Everything else follows.
+
 ## The first three things to tell anyone about the terminal
 
 1. **Ctrl+L clears the screen.** Pure win: no arguments, no risk, instant feedback — and it quietly teaches lesson 3 above (nothing was deleted; the machine remembers everything).
