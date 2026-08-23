@@ -138,6 +138,30 @@ stateDiagram-v2
     Scrolled --> Empty : Ctrl+L
 ```
 
+## Addendum 2: the Scotty question (2026-08-23, still the same day)
+
+> Browse files in a file-browser CLI, exit to a viewer with a filename, exit
+> the viewer, return to the browser with the same file selected. "We are using
+> computers, can they nae handle it, Captain?"
+
+Aye — two solved patterns, one known absence:
+
+1. **Resident parent (don't exit).** yazi/lf/ranger spawn the viewer as a
+   child, block, and redraw with cursor intact on `q`. State = live process
+   memory; the screen is a face, not a store.
+2. **State-in-caller (write it down).** fzf/broot print-and-die; the caller
+   persists the query/selection (`--print-query`, `--outcmd`, sockets) and
+   re-seeds on relaunch. State in Unix lives in processes and files, never
+   in the screen.
+3. **The absence:** the terminal offers one alt-screen bit — no suspension
+   stack. The stack exists as job control (Ctrl+Z, BSD 1979) and tmux
+   (software page-stream).
+
+The trade: stateful residents vs stateless filters. Print-and-exit is
+chainable *because* it gave up state; residents have state *because* they
+gave up composability. Same door, fourth road: the screen was never the
+state.
+
 ## The first three things to tell anyone about the terminal
 
 1. **Ctrl+L clears the screen.** Pure win: no arguments, no risk, instant feedback — and it quietly teaches lesson 3 above (nothing was deleted; the machine remembers everything).
