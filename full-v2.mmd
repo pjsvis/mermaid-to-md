@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> Empty
+    Empty --> Alt : smcup
+    Alt --> Alt : draws freely
+    Alt --> Empty : rmcup
+    Empty --> Scrolled : ls, cat
+    Scrolled --> Empty : Ctrl-l
