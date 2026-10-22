@@ -218,9 +218,15 @@ if [[ -z "$infile" || "$infile" == "-" ]]; then src="$(cat)"; fname=""
 else [[ -f "$infile" ]] || { echo "Error: not found: $infile" >&2; exit 1; }
   src="$(cat "$infile")"; fname="$(basename "${infile%.mmd}")"; fi
 [[ -z "$title" && -n "$fname" ]] && { t="${fname//-/ }"; title="${t//_/ }"; }
+# Emit to the fd we were handed. Do NOT reopen /dev/stdout: it is a fresh open()
+# of /proc/self/fd/1, and a caller that hands us a pipe it created itself gets
+# ENXIO — the render then vanishes with a one-line bash error. Measured
+# 2026-10-22: Bun.spawn (okuda's diagram pipe on Omarchy) fails, a bash pipeline
+# succeeds, and the only difference is who opened the pipe.
+[[ -n "$outfile" ]] && exec > "$outfile"
 # blank input → valid (near-)empty markdown, no crash
 if [[ -z "$(printf '%s' "$src" | tr -d '[:space:]')" ]]; then
-  if [[ -n "$title" ]]; then printf '# %s\n' "$title" > "${outfile:-/dev/stdout}"; fi
+  if [[ -n "$title" ]]; then printf '# %s\n' "$title"; fi
   exit 0
 fi
 art="$(printf '%s' "$src" | "$BIN" || true)"
@@ -231,4 +237,4 @@ art="$(printf '%s' "$src" | "$BIN" || true)"
   # artifact — re-inject is idempotent, --verify is fresh. The source is a
   # post-read checksum, flat and visible below the art (no <details>).
   printf '<!-- mermaid-to-md:art -->\n```text\n%s\n```\n\n```mmd\n%s\n```\n' "$art" "$src"
-} > "${outfile:-/dev/stdout}"
+}
