@@ -46,6 +46,10 @@ esac
 
 PLATFORM="${PLATFORM_OS}-${PLATFORM_ARCH}"
 BIN_NAME="mermaid-tui"
+# Release assets are platform-suffixed (mermaid-tui-linux-x64, ...). A bare
+# "mermaid-tui" cannot be right when five platform jobs publish to one
+# release — the names would collide and the last upload would win.
+BIN_ASSET="${BIN_NAME}-${PLATFORM}"
 
 echo "Installing mermaid-tui + mermaid-to-md wrapper for ${PLATFORM} (version: ${VERSION})"
 
@@ -70,8 +74,8 @@ fetch() {  # fetch <asset-name> <dest>
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-echo "Downloading ${ASSET_URL}/${BIN_NAME}"
-fetch "$BIN_NAME" "${TMPDIR}/${BIN_NAME}"
+echo "Downloading ${ASSET_URL}/${BIN_ASSET}"
+fetch "$BIN_ASSET" "${TMPDIR}/${BIN_NAME}"
 
 echo "Downloading ${ASSET_URL}/mermaid-to-md.sh"
 fetch "mermaid-to-md.sh" "${TMPDIR}/mermaid-to-md"

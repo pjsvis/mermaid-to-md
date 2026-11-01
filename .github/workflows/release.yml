@@ -86,10 +86,19 @@ jobs:
           VERSION=${GITHUB_REF_NAME#v}
           (cd npm/${{ matrix.target }} && npm version "$VERSION" --allow-same-version && npm publish --access public)
 
+      - name: Stage platform-named binary for the release
+        shell: bash
+        # One release holds five binaries. The asset name carries the
+        # platform: a bare `mermaid-tui` collides across the matrix, and
+        # install.sh cannot pick the right one by name.
+        run: |
+          cp "npm/${{ matrix.target }}/bin/${{ matrix.bin }}" \
+             "${RUNNER_TEMP}/mermaid-tui-${{ matrix.target }}"
+
       - name: Upload binary to release
         uses: softprops/action-gh-release@v2
         with:
-          files: npm/${{ matrix.target }}/bin/${{ matrix.bin }}
+          files: ${{ runner.temp }}/mermaid-tui-${{ matrix.target }}
 
   # After all platform packages are published, publish the main package.
   publish-main:
