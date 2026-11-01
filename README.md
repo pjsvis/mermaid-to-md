@@ -21,7 +21,7 @@ ship text, done.
 
 ```bash
 cargo build --release
-echo 'graph TD\n  A --> B --> C' | ./target/release/mermaid-tui
+printf 'graph TD\n  A --> B --> C\n' | ./target/release/mermaid-tui
 ```
 
 ### From npm (once published)
@@ -118,7 +118,7 @@ mermaid-to-md/
 │   └── win32-x64/
 ├── install.sh               # curl | sh escape hatch for non-npm users
 ├── SYSTEM.md               # the Edinburgh Protocol (agent operating system)
-├── DEPENDENCIES.md         # install instructions (macOS verified, Linux/Windows invited)
+├── DEPENDENCIES.md         # install instructions (macOS + Omarchy/Arch verified, Windows invited)
 ├── USAGE.md                # how to use: reasoning with baked state diagrams
 ├── agent-workflow-discussion.md  # dogfood: state diagram as comms channel
 └── README.md

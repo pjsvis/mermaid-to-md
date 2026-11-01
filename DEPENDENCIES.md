@@ -71,7 +71,7 @@ glow --version
 git clone https://github.com/pjsvis/mermaid-to-md.git
 cd mermaid-to-md
 cargo build --release
-echo 'graph TD\n  A --> B --> C' | ./target/release/mermaid-tui
+printf 'graph TD\n  A --> B --> C\n' | ./target/release/mermaid-tui
 ```
 
 Preview the demo:
@@ -84,49 +84,88 @@ glow demo/mermaid-to-md-demo.md
 
 ---
 
-## Appendix: Linux and Windows
+## Omarchy / Arch Linux install (verified)
 
-Install instructions for Linux and Windows are not yet verified from this
-repo. Contributions welcome — see below.
+Verified on Omarchy 4.0.6 (Arch-based, x86_64), 2026-11-01. The same
+commands apply to Arch Linux; package names come from the official repos.
 
-### Linux
-
-The Rust toolchain installs via the same `rustup` script as macOS:
+### Rust toolchain
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
 ```
 
-`just` is a Rust crate and installs via cargo:
+Verify:
 
 ```bash
-cargo install just
+cargo --version
 ```
 
-`glow` is **not** a Rust crate — it is Charm's Go binary, so `cargo install
-glow` does not work (the `glow` crate on crates.io is an unrelated OpenGL
-bindings library). Install the canonical Charm `glow` via a package manager
-or Go:
+### just and glow
+
+Both are in the Arch/Omarchy repositories — no `cargo install` needed:
 
 ```bash
-brew install glow          # Homebrew (macOS or Linux)
-pacman -S glow             # Arch
-sudo snap install glow     # Snap
-# Debian/Ubuntu and Fedora/RHEL: use Charm's apt/yum repo — see
-#   https://github.com/charmbracelet/glow#installation
-# or, with Go installed:
-go install github.com/charmbracelet/glow/v2@latest
+sudo pacman -S just glow
 ```
 
-Both `just` and `glow` are also packaged by many distributions
-(e.g. `apt`, `dnf`, `pacman`); exact names and availability vary.
+Verify:
 
-**Contributing:** If you have verified install instructions for a specific
-Linux distribution, please open a PR updating this section with the exact
-commands and package names.
+```bash
+just --version
+glow --version
+```
 
-### Windows
+### Build and run
+
+```bash
+git clone https://github.com/pjsvis/mermaid-to-md.git
+cd mermaid-to-md
+cargo build --release
+printf 'graph TD\n  A --> B --> C\n' | ./target/release/mermaid-tui
+```
+
+Preview the demo:
+
+```bash
+just demo
+# or
+glow demo/mermaid-to-md-demo.md
+```
+
+**Gotcha — `echo` does not expand `\n` under bash.** Macs default to zsh,
+where `echo 'graph TD\n  A --> B'` emits real newlines; Omarchy defaults to
+bash, where it emits a literal `\n` and the renderer boxes the source as an
+unknown diagram. Always use `printf` for multi-line stdin (as above).
+
+### Install the CLI on PATH (verified)
+
+`just install-local` copies the binary and symlinks the wrapper into
+`~/.local/bin`:
+
+```bash
+just install-local
+mermaid-to-md --version
+printf 'graph TD\n  A --> B\n' | mermaid-to-md -
+```
+
+The binary must be **copied**, not symlinked into the build tree: the wrapper
+first looks for `../target/release/mermaid-tui` relative to itself (which does
+not exist off the build tree), then falls back to `command -v mermaid-tui`.
+The symlinked wrapper is live, so the clone stays part of the installation —
+`git pull` there updates the installed wrapper.
+
+**`install.sh` is not usable yet.** It downloads release assets, and no
+GitHub release has been published. Until one is, build from source as above.
+The release workflow now uploads platform-named binaries
+(`mermaid-tui-linux-x64`, …) so `install.sh` can select the right asset once a
+release exists; this path was exercised locally against a mock release, not
+against GitHub.
+
+---
+
+## Appendix: Windows (unverified)
 
 The Rust toolchain installs via `rustup`:
 
