@@ -15,7 +15,15 @@ email client — without a renderer, runtime, or plugin.
 The diagram is the product. The source is reference material. Render once,
 ship text, done.
 
+The canonical claims — each with the command that proves it — live in
+[docs/statements.md](docs/statements.md). This README is the tour, not the
+ledger.
+
 ## Quick start
+
+**Install status (S6).** Source build is the only verified install. The npm
+packages and `install.sh` are packaged but unpublished; no GitHub release
+exists. [docs/statements.md](docs/statements.md) is the source of truth.
 
 ### From source (Rust)
 
@@ -24,22 +32,22 @@ cargo build --release
 printf 'graph TD\n  A --> B --> C\n' | ./target/release/mermaid-tui
 ```
 
-### From npm (once published)
+### From npm and curl | sh (unpublished)
+
+These paths are exercised in CI but are not installable until the first
+release. The commands are shown for what the release will ship, not as a
+promise about today.
 
 ```bash
+# When the npm package is published
 npx mermaid-to-md < diagram.mmd > out.md
-```
 
-### From source (curl | sh, once a release is published)
-
-```bash
+# When the GitHub release exists
 curl -fsSL https://raw.githubusercontent.com/pjsvis/mermaid-to-md/main/install.sh | sh
 ```
 
-Downloads the precompiled binary and the `mermaid-to-md` wrapper for your
-platform to `~/.local/bin`. No Node, no Rust toolchain — the full CLI
-(engine + bake/inject/verify) with nothing else. (Use `--prefix /usr/local` or
-`--version <version>` to customise; defaults to the latest release.)
+`install.sh` installs the precompiled binary and the `mermaid-to-md` wrapper
+to `~/.local/bin`; `--prefix` and `--version` customise the install.
 
 ### Render to a markdown file
 
@@ -63,15 +71,22 @@ glow demo/mermaid-to-md-demo.md
 ## Modes
 
 The binary (`mermaid-tui`) renders Mermaid source from stdin to Unicode art
-on stdout — `--width N` sets the canvas width, `--help` shows the surface. The three modes below are the wrapper layer
-(`scripts/mermaid-to-md.sh`) — shipped (bake, inject, verify; `just test`
-runs the regression suite). npm packaging is pending (`td-6e3b3a`).
+on stdout — `--width N` sets the canvas width, `--help` shows the surface. The
+three modes below are the wrapper layer (`scripts/mermaid-to-md.sh`), shipped
+in this repo and packaged for the unpublished npm/curl assets (S6).
 
 | Mode | Command | What it does |
 |------|---------|--------------|
 | **Bake** | `mermaid-to-md <file.mmd> -o <out.md>` | Render source → markdown file with art + source |
 | **Inject** | `mermaid-to-md --inject <file.md>` | Render `​```mmd` blocks in-place, insert/replace art blocks |
 | **Verify** | `mermaid-to-md --verify <file.md>` | Re-render and diff — exit 0 if fresh, 1 if stale |
+
+## What it draws
+
+Five families: `flowchart`/`graph`, `stateDiagram`, `classDiagram`,
+`erDiagram`, and `sequenceDiagram`. Every other Mermaid family returns its
+source in a framed box — a declared exclusion, not a rendering failure. (S8 in
+[docs/statements.md](docs/statements.md).)
 
 ## Why not WASM?
 
@@ -106,6 +121,8 @@ mermaid-to-md/
 ├── debriefs/               # session debriefs
 ├── decisions/              # decision records (positioning, scope)
 ├── playbooks/              # repeatable patterns (diagrams, video recording)
+├── docs/
+│   └── statements.md       # canonical product claims, each with a prover
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml            # build + test + npm-pack validation on push

@@ -5,6 +5,9 @@
 > A guide for humans using mermaid-to-md as a reasoning tool, not just a
 > renderer. Open in Glow (or `cat`) alongside a terminal for editing.
 
+The product claims — each with the command that proves it — live in
+[docs/statements.md](docs/statements.md).
+
 ## The pitch
 
 This tool renders Mermaid diagrams to Unicode box-drawing art and bakes the

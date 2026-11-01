@@ -26,6 +26,10 @@ or clone and `cat` a file. The output requires nothing.
 
 The dependencies below are for *building* and *previewing*, not for viewing.
 
+**Install status (S6).** Source build is the only verified install. The npm
+packages and `install.sh` are packaged but unpublished; no GitHub release
+exists. [docs/statements.md](docs/statements.md) is the source of truth.
+
 ## macOS install (verified)
 
 ### Rust toolchain
@@ -156,12 +160,11 @@ not exist off the build tree), then falls back to `command -v mermaid-tui`.
 The symlinked wrapper is live, so the clone stays part of the installation —
 `git pull` there updates the installed wrapper.
 
-**`install.sh` is not usable yet.** It downloads release assets, and no
+**`install.sh` is not usable yet (S6).** It downloads release assets, and no
 GitHub release has been published. Until one is, build from source as above.
-The release workflow now uploads platform-named binaries
-(`mermaid-tui-linux-x64`, …) so `install.sh` can select the right asset once a
-release exists; this path was exercised locally against a mock release, not
-against GitHub.
+The release workflow uploads platform-named binaries (`mermaid-tui-linux-x64`,
+…) so `install.sh` can select the right asset once a release exists; this path
+was exercised locally against a mock release, not against GitHub.
 
 ---
 
