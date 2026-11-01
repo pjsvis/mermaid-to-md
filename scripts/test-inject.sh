@@ -313,5 +313,40 @@ run_sut --verify "$f"
 assert_exit "old-format-convert verifies clean" 0 "$LAST_RC"
 
 # =========================================================================
+# Caller-owned pipe (td-42a16f): bake mode must write to the fd it was handed.
+# Reopening /dev/stdout by path is a fresh open() of /proc/self/fd/1, and a
+# caller that created the pipe itself (Bun.spawn, child_process) gets ENXIO —
+# the render vanishes with one bash error and exit 1. The regression only
+# reproduces when the parent owns the pipe; a bash pipeline cannot show it.
+# Node and Bun share the spawn shape, so node is the portable prover here.
+# =========================================================================
+if command -v node >/dev/null 2>&1; then
+  if pipe_out="$(node - "$SCRIPT" <<'NODE' 2>&1
+const { spawn } = require('child_process');
+const script = process.argv[2];
+const p = spawn(script, ['-'], { stdio: ['pipe', 'pipe', 'pipe'], env: process.env });
+let out = '', err = '';
+p.stdout.on('data', d => { out += d; });
+p.stderr.on('data', d => { err += d; });
+p.on('close', code => {
+  const hasRegion = out.includes('<!-- mermaid-to-md:art -->');
+  const hasArt = out.includes('│ B │');
+  if (code !== 0 || !hasRegion || !hasArt || /No such device|ENXIO/.test(err)) {
+    console.error(JSON.stringify({ code, hasRegion, hasArt, err: err.trim(), out }));
+    process.exit(1);
+  }
+});
+p.stdin.end('graph TD\n  A --> B\n');
+NODE
+)"; then
+    ok "bake survives a caller-owned pipe (node spawn)"
+  else
+    notok "bake survives a caller-owned pipe (node spawn)" "$pipe_out"
+  fi
+else
+  ok "bake survives a caller-owned pipe (SKIP: node not found)"
+fi
+
+# =========================================================================
 printf '\n# %d/%d assertions pass (%d fail)\n' "$PASS" "$NT" "$FAIL"
 [[ "$FAIL" -eq 0 ]]
